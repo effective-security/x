@@ -41,4 +41,4 @@ map_log:
     directory: /tmp/${USER}/audit
 
 
-client_api_key: secret://secret1/api-key1
+client_api_key: secret://secret1-${ENVIRONMENT}/api-key1-${ENVIRONMENT}

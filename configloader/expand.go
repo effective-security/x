@@ -33,18 +33,6 @@ func (f *Expander) ExpandAll(obj interface{}) error {
 
 // Expand replace variables in the input string
 func (f *Expander) Expand(s string) (string, error) {
-	// try first prefix
-	s, err := ResolveValueWithSecrets(s, f.SecretProvider)
-	if err != nil {
-		return s, err
-	}
-
-	if strings.Contains(s, "${") {
-		for key, value := range f.Variables {
-			s = strings.Replace(s, key, value, -1)
-		}
-	}
-
 	if strings.Contains(s, "${") {
 		s = os.Expand(s, func(env string) string {
 			if strings.HasPrefix(env, SecretSource) && f.SecretProvider != nil {
@@ -62,9 +50,17 @@ func (f *Expander) Expand(s string) (string, error) {
 			return os.Getenv(env)
 		})
 	}
+
 	if strings.Contains(s, "${") {
 		return s, errors.Errorf("unable to resolve variables: %s", s)
 	}
+
+	// try prefix
+	s, err := ResolveValueWithSecrets(s, f.SecretProvider)
+	if err != nil {
+		return s, err
+	}
+
 	return s, nil
 }
 
