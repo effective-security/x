@@ -49,7 +49,7 @@ func Test_ConfigWithSchema_Secret(t *testing.T) {
 
 	configloader.SecretProviderInstance = nil
 	_, err := configloader.ResolveValue(cfg)
-	assert.EqualError(t, err, "secret loader not provided")
+	assert.EqualError(t, err, "secret loader not provided: unable to expand: secret://key1")
 
 	configloader.SecretProviderInstance = &mockSecret{
 		secrets: map[string]string{
@@ -62,7 +62,7 @@ func Test_ConfigWithSchema_Secret(t *testing.T) {
 	assert.Equal(t, "value1", val)
 
 	_, err = configloader.ResolveValue("secret://key2")
-	assert.EqualError(t, err, "unable to load secret: secret not found: key2")
+	assert.EqualError(t, err, "unable to load secret: key2: secret not found: key2")
 }
 
 type mockSecret struct {

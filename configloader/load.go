@@ -52,12 +52,12 @@ func ResolveValueWithSecrets(val string, loader SecretProvider) (string, error) 
 		}
 	} else if strings.HasPrefix(val, SecretSource) {
 		if loader == nil {
-			return "", errors.Errorf("secret loader not provided")
+			return "", errors.Errorf("secret loader not provided: unable to expand: %s", val)
 		}
 		name := strings.TrimPrefix(val, SecretSource)
 		sec, err := loader.GetSecret(name)
 		if err != nil {
-			return val, errors.WithMessage(err, "unable to load secret")
+			return val, errors.WithMessagef(err, "unable to load secret: %s", name)
 		}
 		val = sec
 	}

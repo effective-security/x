@@ -1,7 +1,6 @@
 package configloader
 
 import (
-	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -117,9 +116,8 @@ func (f *Factory) LoadForHostName(configFile, hostnameOverride string, config in
 	variables := f.getVariableValues(environment)
 
 	envName := f.envPrefix + "CONFIG_DIR"
-	envNameTemplate := "${" + envName + "}"
-	if variables[envNameTemplate] == "" {
-		variables[envNameTemplate] = baseDir
+	if variables[envName] == "" {
+		variables[envName] = baseDir
 		os.Setenv(envName, baseDir)
 	}
 
@@ -207,25 +205,28 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string, config 
 
 func (f *Factory) getVariableValues(environment string) map[string]string {
 	ret := map[string]string{
-		"${HOSTNAME}":              f.nodeInfo.HostName(),
-		"${NODENAME}":              f.nodeInfo.NodeName(),
-		"${LOCALIP}":               f.nodeInfo.LocalIP(),
-		"${USER}":                  f.userName(),
-		"${NORMALIZED_USER}":       f.normalizedUserName(),
-		"${ENVIRONMENT}":           environment,
-		"${ENVIRONMENT_UPPERCASE}": strings.ToUpper(environment),
+		"HOSTNAME":              f.nodeInfo.HostName(),
+		"NODENAME":              f.nodeInfo.NodeName(),
+		"LOCALIP":               f.nodeInfo.LocalIP(),
+		"USER":                  f.userName(),
+		"NORMALIZED_USER":       f.normalizedUserName(),
+		"ENVIRONMENT":           environment,
+		"ENVIRONMENT_UPPERCASE": strings.ToUpper(environment),
 	}
 
 	if len(f.envPrefix) > 0 {
+		for k, v := range ret {
+			ret[f.envPrefix+k] = v
+		}
+
 		for _, x := range os.Environ() {
 			kvp := strings.SplitN(x, "=", 2)
 
 			env, val := kvp[0], kvp[1]
 			if strings.HasPrefix(env, f.envPrefix) {
-				formattedKey := fmt.Sprintf("${%v}", env)
-				if _, ok := ret[formattedKey]; !ok {
-					logger.KV(xlog.DEBUG, "set", formattedKey)
-					ret[formattedKey] = val
+				if _, ok := ret[env]; !ok {
+					logger.KV(xlog.DEBUG, "set", env)
+					ret[env] = val
 				}
 			}
 		}

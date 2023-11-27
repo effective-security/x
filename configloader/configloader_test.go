@@ -38,7 +38,7 @@ func TestLoadYAML(t *testing.T) {
 	t.Setenv("NODENAME", "cluster1")
 	c = new(configuration)
 	_, err = f.Load(cfgFile, c)
-	assert.EqualError(t, err, "secret loader not provided")
+	assert.EqualError(t, err, "secret loader not provided: unable to expand: secret://secret1-test/api-key1-test")
 	assert.Equal(t, "cluster1", c.ClusterName)
 }
 
@@ -51,8 +51,8 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 
 	sp := &mockSecret{
 		secrets: map[string]string{
-			"secret1": "api-key1",
-			"secret2": "api-key2",
+			"secret1-UNIT_TEST": "api-key1",
+			"secret2-UNIT_TEST": "api-key2",
 		},
 	}
 	f.WithSecretProvider(sp)
@@ -114,8 +114,8 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 
 	sp := &mockSecret{
 		secrets: map[string]string{
-			"secret1": "api-key1",
-			"secret2": "api-key2",
+			"secret1-test2": "api-key1",
+			"secret2-test2": "api-key2",
 		},
 	}
 	f.WithSecretProvider(sp)
