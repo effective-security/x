@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/alecthomas/kong"
-	"github.com/effective-security/x/slices"
+	"github.com/effective-security/x/values"
 )
 
 // VersionFlag is a flag to print version
@@ -18,7 +18,7 @@ func (v VersionFlag) IsBool() bool { return true }
 
 // BeforeApply is executed before context is applied
 func (v VersionFlag) BeforeApply(app *kong.Kong, vars kong.Vars) error {
-	fmt.Fprintln(app.Stdout, slices.StringsCoalesce(vars["version"], string(v)))
+	fmt.Fprintln(app.Stdout, values.StringsCoalesce(vars["version"], string(v)))
 	app.Exit(0)
 	return nil
 }
