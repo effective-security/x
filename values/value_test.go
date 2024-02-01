@@ -17,9 +17,13 @@ func TestValues(t *testing.T) {
 	assert.Equal(t, "aud:\n- t1\njti: \"123\"\n", c.YAML())
 	assert.Equal(t, []string{"t1"}, c.StringSlice("aud"))
 
-	c2 := FromJSON(`{"aud":["t1"],"jti":"123"}`)
+	c.GetOrSet("exp", func(key string) any {
+		return "123"
+	})
+
+	c2 := FromJSON(`{"aud":["t1"],"exp":"123","jti":"123"}`)
 	assert.Equal(t, c.JSON(), c2.JSON())
-	c2 = FromYAML("aud:\n- t1\njti: \"123\"\n")
+	c2 = FromYAML("aud:\n- t1\njti: \"123\"\nexp: \"123\"\n")
 	assert.Equal(t, c.JSON(), c2.JSON())
 
 	var c3 testStruct
