@@ -128,3 +128,16 @@ func (c MapAny) Int64(k string) int64 {
 	}
 	return Int64(c[k])
 }
+
+// GetOrSet existing existing value or set new value
+func (c MapAny) GetOrSet(key string, getter func(key string) any) any {
+	if c == nil {
+		return nil
+	}
+	if v, ok := c[key]; ok {
+		return v
+	}
+	v := getter(key)
+	c[key] = v
+	return v
+}
