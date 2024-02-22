@@ -214,6 +214,23 @@ func UniqueStrings(dups []string) []string {
 	return list
 }
 
+// Deduplicate returns a deduplicated slice.
+func Deduplicate[E comparable](slice []E) []E {
+	if len(slice) < 2 {
+		return slice
+	}
+
+	seen := make(map[E]bool)
+	deduplicated := make([]E, 0, len(slice))
+	for _, v := range slice {
+		if !seen[v] {
+			seen[v] = true
+			deduplicated = append(deduplicated, v)
+		}
+	}
+	return deduplicated
+}
+
 // Truncate returns a new slice containing the first maxLen elements of arr.
 // If maxLen is greater than the length of arr, arr is returned.
 func Truncate[T any](arr []T, maxLen uint) []T {
