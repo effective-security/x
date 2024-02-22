@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSlices_NvlString(t *testing.T) {
@@ -328,4 +329,91 @@ func Test_removeDuplicates(t *testing.T) {
 	dups := []string{"12", "45", "45", "78", "12", "porto"}
 	noDups := UniqueStrings(dups)
 	assert.Equal(t, len(noDups), 4)
+}
+
+func Test_Replace(t *testing.T) {
+	Replace(nil, "", "")
+
+	sliceStr := []string{}
+	Replace(sliceStr, "old", "new")
+	assert.Equal(t, 0, len(sliceStr))
+
+	sliceStr = []string{"old", "other"}
+	Replace(sliceStr, "", "something")
+	assert.Equal(t, []string{"old", "other"}, sliceStr)
+
+	sliceStr = []string{"old", "other"}
+	Replace(sliceStr, "old", "new")
+	assert.Equal(t, []string{"new", "other"}, sliceStr)
+
+	sliceInt := []int{1}
+	Replace(sliceInt, 2, 4)
+	assert.Equal(t, []int{1}, sliceInt)
+
+	sliceInt = []int{1, 2, 3}
+	Replace(sliceInt, 2, 4)
+	assert.Equal(t, []int{1, 4, 3}, sliceInt)
+}
+
+func Test_StringArrayToMap(t *testing.T) {
+	m, err := StringArrayToMap(nil)
+	require.NoError(t, err)
+	assert.Equal(t, 0, len(m))
+
+	m, err = StringArrayToMap([]string{})
+	require.NoError(t, err)
+	assert.Equal(t, 0, len(m))
+
+	m, err = StringArrayToMap([]string{"a="}) // value is optional
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"a": ""}, m)
+
+	m, err = StringArrayToMap([]string{"a=b", "c=d"})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"a": "b", "c": "d"}, m)
+
+	m, err = StringArrayToMap([]string{"a1,a2,a3=b1,b2,b3", "c1,c2,c3=d1,d2,d3"})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"a1,a2,a3": "b1,b2,b3", "c1,c2,c3": "d1,d2,d3"}, m)
+
+	m, err = StringArrayToMap([]string{"a=b1=b2=b3", "c=d1=d2=d3"})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"a": "b1=b2=b3", "c": "d1=d2=d3"}, m)
+
+	// error cases
+	m, err = StringArrayToMap([]string{"=a"}) // no key
+	require.Error(t, err)
+	assert.Equal(t, 0, len(m))
+
+	m, err = StringArrayToMap([]string{"a"}) // no separator
+	require.Error(t, err)
+	assert.Equal(t, 0, len(m))
+}
+
+func Test_TruncateArray(t *testing.T) {
+	assert.Nil(t, Truncate([]any(nil), 0))
+	assert.Nil(t, Truncate([]any(nil), 5))
+	assert.Empty(t, Truncate([]string{}, 0))
+	assert.Empty(t, Truncate([]string{}, 5))
+	assert.True(t, reflect.DeepEqual([]int{}, Truncate([]int{1, 2, 3}, 0)))
+	assert.True(t, reflect.DeepEqual([]int{1}, Truncate([]int{1, 2, 3}, 1)))
+	assert.True(t, reflect.DeepEqual([]int{1, 2, 3}, Truncate([]int{1, 2, 3}, 3)))
+}
+
+func Test_Contains(t *testing.T) {
+	assert.False(t, Contains([]int(nil), 1))
+	assert.False(t, Contains([]int{}, 1))
+	assert.False(t, Contains([]int{2, 3, 4}, 1))
+	assert.True(t, Contains([]int{1}, 1))
+	assert.True(t, Contains([]int{2, 3, 4}, 3))
+
+	assert.False(t, Contains([]string{""}, "a"))
+	assert.True(t, Contains([]string{""}, ""))
+	assert.True(t, Contains([]string{"a", "b", ""}, ""))
+}
+
+func Test_Hash(t *testing.T) {
+	require.NotEmpty(t, HashStrings())
+	require.NotEmpty(t, HashStrings("a"))
+	require.NotEmpty(t, HashStrings("a", "b", "c"))
 }

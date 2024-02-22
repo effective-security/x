@@ -2,6 +2,10 @@
 package slices
 
 import (
+	"crypto"
+	"encoding/base64"
+	"errors"
+	"regexp"
 	"strings"
 )
 
@@ -208,4 +212,59 @@ func UniqueStrings(dups []string) []string {
 		}
 	}
 	return list
+}
+
+// Truncate returns a new slice containing the first maxLen elements of arr.
+// If maxLen is greater than the length of arr, arr is returned.
+func Truncate[T any](arr []T, maxLen uint) []T {
+	if uint(len(arr)) <= maxLen {
+		return arr
+	}
+	return arr[:maxLen]
+}
+
+// Contains returns true if val is in arr, and false otherwise.
+func Contains[T comparable](arr []T, val T) bool {
+	for _, v := range arr {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
+
+// StringArrayToMap converts a string array to a map.
+// Each element of the string array must be in the form {key}={value}.
+// - {key} is required;
+// - the first '=' is the separator (also required);
+// -  {value} is optional.
+func StringArrayToMap(arr []string) (map[string]string, error) {
+	m := make(map[string]string)
+	for _, v := range arr {
+		re := regexp.MustCompile(`^([^=]+)=(.*)$`)
+		matches := re.FindStringSubmatch(v)
+		if len(matches) != 3 {
+			return nil, errors.New("invalid format for string array")
+		}
+		m[matches[1]] = matches[2]
+	}
+	return m, nil
+}
+
+// Replace replaces all occurrences of old with new in slice.
+func Replace[E comparable](slice []E, old, new E) {
+	for i, v := range slice {
+		if v == old {
+			slice[i] = new
+		}
+	}
+}
+
+// HashStrings returns the base64 SHA-1 of a series of string values
+func HashStrings(values ...string) string {
+	h := crypto.SHA1.New()
+	for _, v := range values {
+		_, _ = h.Write([]byte(v))
+	}
+	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }
