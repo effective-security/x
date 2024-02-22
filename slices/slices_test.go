@@ -417,3 +417,10 @@ func Test_Hash(t *testing.T) {
 	require.NotEmpty(t, HashStrings("a"))
 	require.NotEmpty(t, HashStrings("a", "b", "c"))
 }
+
+func Test_Deduplicate(t *testing.T) {
+	assert.Equal(t, 0, len(Deduplicate[int](nil)))
+	assert.Equal(t, 0, len(Deduplicate([]int{})))
+	assert.Equal(t, []int{1}, Deduplicate([]int{1}))
+	assert.Equal(t, []int{1, 2, 3}, Deduplicate([]int{1, 2, 2, 3, 1, 1}))
+}
