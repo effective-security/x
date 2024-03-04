@@ -8,7 +8,7 @@ require (
 	github.com/effective-security/xlog v0.7.1
 	github.com/oleiade/reflections v1.0.1
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	go.uber.org/config v1.4.0
 	gopkg.in/yaml.v3 v3.0.1
 )

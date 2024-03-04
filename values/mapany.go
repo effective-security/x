@@ -7,7 +7,7 @@ import (
 
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // MapAny provides map of values
