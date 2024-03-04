@@ -8,8 +8,9 @@ require (
 	github.com/effective-security/xlog v0.7.1
 	github.com/oleiade/reflections v1.0.1
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	go.uber.org/config v1.4.0
+	gopkg.in/yaml.v2 v2.2.5
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -26,7 +27,6 @@ require (
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.12 // indirect
-	gopkg.in/yaml.v2 v2.2.5 // indirect
 	honnef.co/go/tools v0.0.1-2019.2.3 // indirect
 )
 
