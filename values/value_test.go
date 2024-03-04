@@ -83,6 +83,41 @@ func TestValues_String(t *testing.T) {
 	c(o, "struct", `{"Foo":"foo","B":true,"I":-1}`)
 }
 
+func TestValues_JSON(t *testing.T) {
+	stru := struct {
+		Foo string
+		B   bool
+		I   int
+	}{Foo: "foo", B: true, I: -1}
+
+	o := MapAny{
+		"foo":        "bar",
+		"blank":      "",
+		"count":      uint64(1),
+		"ints":       []uint64{1, 2, 3, 4},
+		"strings":    []string{"strings"},
+		"empty":      []string{},
+		"interfaces": []any{"interfaces"},
+		"einterface": []any{},
+		"struct":     stru,
+	}
+
+	js := func(o MapAny, k, exp string) {
+		act := JSON(o[k])
+		assert.Equal(t, act, exp)
+	}
+	js(o, "foo", `"bar"`)
+	js(o, "blank", `""`)
+	js(o, "unknown", "")
+	js(o, "count", "1")
+	js(o, "ints", `[1,2,3,4]`)
+	js(o, "strings", `["strings"]`)
+	js(o, "empty", `[]`)
+	js(o, "interfaces", `["interfaces"]`)
+	js(o, "einterface", "[]")
+	js(o, "struct", `{"Foo":"foo","B":true,"I":-1}`)
+}
+
 func TestValues_Int(t *testing.T) {
 	c := func(o MapAny, k string, exp int) {
 		act := o.Int(k)
