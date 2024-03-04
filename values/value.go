@@ -1,6 +1,7 @@
 package values
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -240,4 +241,13 @@ func IsCollection(value any) bool {
 	}
 	kind := reflect.TypeOf(value).Kind()
 	return kind == reflect.Slice || kind == reflect.Map
+}
+
+// JSON returns the value as a JSON string
+func JSON(value any) string {
+	if value == nil {
+		return ""
+	}
+	b, _ := json.Marshal(value)
+	return string(b)
 }
