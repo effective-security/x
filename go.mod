@@ -3,7 +3,7 @@ module github.com/effective-security/x
 go 1.21
 
 require (
-	github.com/alecthomas/kong v0.8.1
+	github.com/alecthomas/kong v0.9.0
 	github.com/deckarep/golang-set v1.8.0
 	github.com/effective-security/xlog v0.7.1
 	github.com/oleiade/reflections v1.0.1
