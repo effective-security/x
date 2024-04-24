@@ -411,3 +411,14 @@ func TestSelect(t *testing.T) {
 	assert.Equal(t, 1, Select(false, 0, 1))
 	assert.Equal(t, uint64(0), Select(true, 0, uint64(1)))
 }
+
+func TestRangeOrderedMap(t *testing.T) {
+	m1 := map[string]string{"ya": "1", "b": "2", "c": "3"}
+
+	var keys []string
+	RangeOrderedMap(m1, func(k, v string) bool {
+		keys = append(keys, k)
+		return true
+	})
+	assert.Equal(t, []string{"b", "c", "ya"}, keys)
+}

@@ -255,11 +255,12 @@ func Contains[T comparable](arr []T, val T) bool {
 // - {key} is required;
 // - the first '=' is the separator (also required);
 // -  {value} is optional.
+var reStringArrayToMap = regexp.MustCompile(`^([^=]+)=(.*)$`)
+
 func StringArrayToMap(arr []string) (map[string]string, error) {
 	m := make(map[string]string)
 	for _, v := range arr {
-		re := regexp.MustCompile(`^([^=]+)=(.*)$`)
-		matches := re.FindStringSubmatch(v)
+		matches := reStringArrayToMap.FindStringSubmatch(v)
 		if len(matches) != 3 {
 			return nil, errors.New("invalid format for string array")
 		}

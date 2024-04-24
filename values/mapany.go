@@ -3,10 +3,12 @@ package values
 import (
 	"bytes"
 	"encoding/json"
+	"sort"
 	"time"
 
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
+	"golang.org/x/exp/constraints"
 	"gopkg.in/yaml.v3"
 )
 
@@ -140,4 +142,29 @@ func (c MapAny) GetOrSet(key string, getter func(key string) any) any {
 	v := getter(key)
 	c[key] = v
 	return v
+}
+
+// OrderedMapKeys returns ordered keys
+func OrderedMapKeys[K constraints.Ordered, V any](m map[K]V) []K {
+	r := make([]K, 0, len(m))
+	for k := range m {
+		r = append(r, k)
+	}
+	sort.Slice(r, func(i, j int) bool {
+		return r[i] < r[j]
+	})
+	return r
+}
+
+// RangeOrderedMap range over ordered map
+func RangeOrderedMap[K constraints.Ordered, V any](c map[K]V, f func(k K, v V) bool) {
+	if c == nil {
+		return
+	}
+
+	for _, k := range OrderedMapKeys(c) {
+		if !f(k, c[k]) {
+			break
+		}
+	}
 }
