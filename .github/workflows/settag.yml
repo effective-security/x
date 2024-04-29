@@ -22,6 +22,9 @@ jobs:
       - name: Fetch History
         run: git fetch --prune --unshallow
 
+      - name: Fetch History
+        run: git fetch --prune --unshallow
+
       - name: set-tag
         run: |
           if [ -z "${{ github.event.inputs.tag }}" ]; then
