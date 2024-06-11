@@ -1,6 +1,6 @@
 module github.com/effective-security/x
 
-go 1.22.2
+go 1.22.3
 
 require (
 	github.com/alecthomas/kong v0.9.0
