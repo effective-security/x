@@ -30,6 +30,22 @@ func String(v any) string {
 			return String(v.([]any)[0])
 		}
 		return ""
+	case int:
+		return strconv.Itoa(tv)
+	case int32:
+		return strconv.Itoa(int(tv))
+	case int64:
+		return strconv.FormatInt(tv, 10)
+	case uint:
+		return strconv.FormatUint(uint64(tv), 10)
+	case uint32:
+		return strconv.FormatUint(uint64(tv), 10)
+	case uint64:
+		return strconv.FormatUint(uint64(tv), 10)
+	case float32:
+		return strconv.FormatUint(uint64(tv), 10)
+	case float64:
+		return strconv.FormatUint(uint64(tv), 10)
 	default:
 		logger.KV(xlog.DEBUG, "reason", "unsupported", "type", fmt.Sprintf("%T", v))
 		return xlog.EscapedString(v)
@@ -66,7 +82,7 @@ func Bool(v any) bool {
 	case bool:
 		return tv
 	case string:
-		return tv == "true"
+		return tv == "true" || tv == "yes"
 	case []any:
 		if len(tv) > 0 {
 			return Bool(v.([]any)[0])
@@ -149,6 +165,10 @@ func Int(v any) int {
 		return int(tv)
 	case uint64:
 		return int(tv)
+	case float32:
+		return int(tv)
+	case float64:
+		return int(tv)
 	case string:
 		i, err := strconv.Atoi(tv)
 		if err != nil {
@@ -184,6 +204,10 @@ func UInt64(v any) uint64 {
 	case uint32:
 		return uint64(tv)
 	case uint64:
+		return uint64(tv)
+	case float32:
+		return uint64(tv)
+	case float64:
 		return uint64(tv)
 	case string:
 		i64, err := strconv.ParseUint(tv, 10, 64)
