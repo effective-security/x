@@ -74,6 +74,14 @@ func TestValues_String(t *testing.T) {
 		"interfaces": []any{"interfaces"},
 		"einterface": []any{},
 		"struct":     stru,
+		"int":        int(1),
+		"int32":      int32(32),
+		"int64":      int64(64),
+		"uint":       uint(123),
+		"uint32":     uint32(132),
+		"uint64":     uint64(164),
+		"float32":    float32(1.1),
+		"float64":    float64(2.64),
 	}
 	c(o, "foo", "bar")
 	c(o, "blank", "")
@@ -84,6 +92,13 @@ func TestValues_String(t *testing.T) {
 	c(o, "interfaces", "interfaces")
 	c(o, "einterface", "")
 	c(o, "struct", `{"Foo":"foo","B":true,"I":-1}`)
+	c(o, "int32", "32")
+	c(o, "int64", "64")
+	c(o, "uint", "123")
+	c(o, "uint32", "132")
+	c(o, "uint64", "164")
+	c(o, "float32", "1")
+	c(o, "float64", "2")
 }
 
 func TestValues_JSON(t *testing.T) {
@@ -141,6 +156,8 @@ func TestValues_Int(t *testing.T) {
 		"uint64":     uint64(164),
 		"interfaces": []any{1},
 		"einterface": []any{},
+		"float32":    float32(1.1),
+		"float64":    float64(2.64),
 	}
 	c(o, "nil", 0)
 	c(o, "struct", 0)
@@ -155,6 +172,8 @@ func TestValues_Int(t *testing.T) {
 	c(o, "uint64", 164)
 	c(o, "interfaces", 1)
 	c(o, "einterface", 0)
+	c(o, "float32", 1)
+	c(o, "float64", 2)
 }
 
 func TestValues_UInt64(t *testing.T) {
@@ -177,6 +196,8 @@ func TestValues_UInt64(t *testing.T) {
 		"uint64":     uint64(164),
 		"interfaces": []any{1},
 		"einterface": []any{},
+		"float32":    float32(1.1),
+		"float64":    float64(2.64),
 	}
 	c(o, "nil", uint64(0))
 	c(o, "struct", uint64(0))
@@ -191,7 +212,8 @@ func TestValues_UInt64(t *testing.T) {
 	c(o, "uint64", uint64(164))
 	c(o, "interfaces", uint64(1))
 	c(o, "einterface", uint64(0))
-
+	c(o, "float32", uint64(1))
+	c(o, "float64", uint64(2))
 }
 
 func TestValues_Int64(t *testing.T) {
