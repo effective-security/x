@@ -46,6 +46,8 @@ func String(v any) string {
 		return strconv.FormatUint(uint64(tv), 10)
 	case float64:
 		return strconv.FormatUint(uint64(tv), 10)
+	case bool:
+		return Select(tv, "true", "false")
 	default:
 		logger.KV(xlog.DEBUG, "reason", "unsupported", "type", fmt.Sprintf("%T", v))
 		return xlog.EscapedString(v)

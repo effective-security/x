@@ -82,6 +82,8 @@ func TestValues_String(t *testing.T) {
 		"uint64":     uint64(164),
 		"float32":    float32(1.1),
 		"float64":    float64(2.64),
+		"bool_true":  true,
+		"bool_false": false,
 	}
 	c(o, "foo", "bar")
 	c(o, "blank", "")
@@ -99,6 +101,8 @@ func TestValues_String(t *testing.T) {
 	c(o, "uint64", "164")
 	c(o, "float32", "1")
 	c(o, "float64", "2")
+	c(o, "bool_true", "true")
+	c(o, "bool_false", "false")
 }
 
 func TestValues_JSON(t *testing.T) {
