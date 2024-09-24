@@ -32,6 +32,8 @@ func String(v any) string {
 		return ""
 	case int:
 		return strconv.Itoa(tv)
+	case int16:
+		return strconv.Itoa(int(tv))
 	case int32:
 		return strconv.Itoa(int(tv))
 	case int64:
@@ -157,6 +159,8 @@ func Int(v any) int {
 		return 0
 	case int:
 		return tv
+	case int16:
+		return int(tv)
 	case int32:
 		return int(tv)
 	case int64:
@@ -197,6 +201,8 @@ func UInt64(v any) uint64 {
 		return 0
 	case int:
 		return uint64(tv)
+	case int16:
+		return uint64(tv)
 	case int32:
 		return uint64(tv)
 	case int64:
@@ -236,6 +242,8 @@ func Int64(v any) int64 {
 		}
 		return 0
 	case int:
+		return int64(tv)
+	case int16:
 		return int64(tv)
 	case int32:
 		return int64(tv)

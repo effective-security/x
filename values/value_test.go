@@ -75,6 +75,7 @@ func TestValues_String(t *testing.T) {
 		"einterface": []any{},
 		"struct":     stru,
 		"int":        int(1),
+		"int16":      int16(20),
 		"int32":      int32(32),
 		"int64":      int64(64),
 		"uint":       uint(123),
@@ -94,6 +95,7 @@ func TestValues_String(t *testing.T) {
 	c(o, "interfaces", "interfaces")
 	c(o, "einterface", "")
 	c(o, "struct", `{"Foo":"foo","B":true,"I":-1}`)
+	c(o, "int16", "20")
 	c(o, "int32", "32")
 	c(o, "int64", "64")
 	c(o, "uint", "123")
@@ -153,6 +155,7 @@ func TestValues_Int(t *testing.T) {
 		"ze":         "abc",
 		"n":          int(-1),
 		"int":        int(1),
+		"int16":	  int16(20),
 		"int32":      int32(32),
 		"int64":      int64(64),
 		"uint":       uint(123),
@@ -169,6 +172,7 @@ func TestValues_Int(t *testing.T) {
 	c(o, "ze", 0)
 	c(o, "n", -1)
 	c(o, "int", 1)
+	c(o, "int16", 20)
 	c(o, "int32", 32)
 	c(o, "int64", 64)
 	c(o, "uint", 123)
@@ -193,6 +197,7 @@ func TestValues_UInt64(t *testing.T) {
 		"ze":         "abc",
 		"n":          int(-1),
 		"int":        int(1),
+		"int16":	  int16(20),
 		"int32":      int32(32),
 		"int64":      int64(64),
 		"uint":       uint(123),
@@ -209,6 +214,7 @@ func TestValues_UInt64(t *testing.T) {
 	c(o, "ze", uint64(0))
 	c(o, "n", uint64(0xffffffffffffffff))
 	c(o, "int", uint64(1))
+	c(o, "int16", uint64(20))
 	c(o, "int32", uint64(32))
 	c(o, "int64", uint64(64))
 	c(o, "uint", uint64(123))
@@ -233,6 +239,7 @@ func TestValues_Int64(t *testing.T) {
 		"ze":         "abc",
 		"n":          int(-1),
 		"int":        int(1),
+		"int16":      int16(20),
 		"int32":      int32(32),
 		"int64":      int64(64),
 		"uint":       uint(123),
@@ -247,6 +254,7 @@ func TestValues_Int64(t *testing.T) {
 	c(o, "ze", int64(0))
 	c(o, "n", int64(-1))
 	c(o, "int", int64(1))
+	c(o, "int16", int64(20))
 	c(o, "int32", int64(32))
 	c(o, "int64", int64(64))
 	c(o, "uint", int64(123))
@@ -303,6 +311,7 @@ func TestValues_Time(t *testing.T) {
 		"invalid":    "2006000000000000000000000000",
 		"int":        int(189898989898),
 		"float":      float64(189898989898.0),
+		"int16":      int16(20),
 		"int32":      int32(32),
 		"int64":      int64(64),
 		"uint":       uint(123),
@@ -319,6 +328,7 @@ func TestValues_Time(t *testing.T) {
 	c(o, "str", tPtr(time.Date(2006, time.January, 2, 15, 4, 5, 0, loc)))
 	c(o, "invalid", nil)
 	c(o, "ze", nil)
+	c(o, "int16", nil)
 	c(o, "int32", nil)
 	c(o, "int", tPtr(time.Unix(189898989898, 0)))
 	c(o, "float", tPtr(time.Unix(189898989898, 0)))
