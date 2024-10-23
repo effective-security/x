@@ -33,20 +33,28 @@ func New(ctx context.Context, every time.Duration, run func(ctx context.Context,
 }
 
 func (t *Ticker) Stop() {
-	if t.ticker != nil {
+	if t != nil && t.ticker != nil {
 		t.ticker.Stop()
-		t.ticker = nil
+		//t.ticker = nil
 	}
 }
 
 func (t *Ticker) GetStatus() string {
+	if t == nil {
+		return ""
+	}
 	return t.status
 }
 
 func (t *Ticker) SetStatus(status string) {
-	t.status = status
+	if t != nil {
+		t.status = status
+	}
 }
 
 func (t *Ticker) Count() int {
+	if t == nil {
+		return 0
+	}
 	return t.count
 }
