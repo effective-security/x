@@ -144,6 +144,29 @@ func (c MapAny) GetOrSet(key string, getter func(key string) any) any {
 	return v
 }
 
+func (c MapAny) Extract(path ...string) MapAny {
+	if c == nil {
+		return nil
+	}
+
+	m := c
+	for _, prop := range path {
+		obj, ok := m[prop]
+		if !ok {
+			m = nil
+			break
+		}
+		objMap, ok := obj.(map[string]any)
+		if !ok {
+			m = nil
+			break
+		}
+		m = objMap
+	}
+
+	return m
+}
+
 // OrderedMapKeys returns ordered keys
 func OrderedMapKeys[K constraints.Ordered, V any](m map[K]V) []K {
 	r := make([]K, 0, len(m))

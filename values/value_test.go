@@ -48,6 +48,34 @@ jti: "123"
 	assert.False(t, IsCollection(nil))
 }
 
+func TestExtract(t *testing.T) {
+	js := `{
+	"l1s": "string",
+	"l1m": {
+		"l2s": "string",
+		"l2m": {
+			"l3s": "string",
+			"l3i": 123,
+			"l3m": {
+				"l4s": "string",
+				"l4a": [1,2,3,4]
+			}
+		}
+	},
+	"l1a": [1,2,3,4]
+}`
+
+	m := FromJSON(js)
+	require.NotNil(t, m)
+	assert.Nil(t, m.Extract("l1s"))
+	assert.Nil(t, m.Extract("l1m", "foo"))
+	assert.Nil(t, m.Extract("l1m", "l2m", "l3s"))
+
+	m2 := m.Extract("l1m", "l2m", "l3m")
+	require.NotNil(t, m2)
+	assert.Equal(t, "string", m2.String("l4s"))
+}
+
 type testStruct struct {
 	JTI string   `json:"jti"`
 	AUD []string `json:"aud"`
