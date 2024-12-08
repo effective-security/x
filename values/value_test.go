@@ -1,6 +1,7 @@
 package values
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -275,6 +276,8 @@ func TestValues_Int64(t *testing.T) {
 		"uint64":     uint64(164),
 		"interfaces": []any{1},
 		"einterface": []any{},
+		"float32":    float32(1.1),
+		"float64":    float64(2.64),
 	}
 	c(o, "nil", int64(0))
 	c(o, "struct", int64(0))
@@ -290,6 +293,98 @@ func TestValues_Int64(t *testing.T) {
 	c(o, "uint64", int64(164))
 	c(o, "interfaces", int64(1))
 	c(o, "einterface", int64(0))
+	c(o, "float32", int64(1))
+	c(o, "float64", int64(2))
+}
+
+const float64EqualityThreshold = 1e-5
+
+func almostEqual(a, b float64) bool {
+	return math.Abs(a-b) <= float64EqualityThreshold
+}
+
+func TestValues_Float64(t *testing.T) {
+	c := func(o MapAny, k string, exp float64) {
+		act := o.Float64(k)
+		assert.True(t, almostEqual(exp, act), "expected %f, got %f", exp, act)
+	}
+
+	o := MapAny{
+		"nil":        nil,
+		"struct":     struct{}{},
+		"z":          "123",
+		"ze":         "abc",
+		"n":          int(-1),
+		"int":        int(1),
+		"int16":      int16(20),
+		"int32":      int32(32),
+		"int64":      int64(64),
+		"uint":       uint(123),
+		"uint32":     uint32(132),
+		"uint64":     uint64(164),
+		"interfaces": []any{1},
+		"einterface": []any{},
+		"float32":    float32(1.1),
+		"float64":    float64(2.64),
+	}
+	c(o, "nil", float64(0))
+	c(o, "struct", float64(0))
+	c(o, "z", float64(123))
+	c(o, "ze", float64(0))
+	c(o, "n", float64(-1))
+	c(o, "int", float64(1))
+	c(o, "int16", float64(20))
+	c(o, "int32", float64(32))
+	c(o, "int64", float64(64))
+	c(o, "uint", float64(123))
+	c(o, "uint32", float64(132))
+	c(o, "uint64", float64(164))
+	c(o, "interfaces", float64(1))
+	c(o, "einterface", float64(0))
+	c(o, "float32", float64(1.1))
+	c(o, "float64", float64(2.64))
+}
+
+func TestValues_Float32(t *testing.T) {
+	c := func(o MapAny, k string, exp float32) {
+		act := o.Float32(k)
+		assert.True(t, almostEqual(float64(exp), float64(act)), "expected %f, got %f", exp, act)
+	}
+
+	o := MapAny{
+		"nil":        nil,
+		"struct":     struct{}{},
+		"z":          "123",
+		"ze":         "abc",
+		"n":          int(-1),
+		"int":        int(1),
+		"int16":      int16(20),
+		"int32":      int32(32),
+		"int64":      int64(64),
+		"uint":       uint(123),
+		"uint32":     uint32(132),
+		"uint64":     uint64(164),
+		"interfaces": []any{1},
+		"einterface": []any{},
+		"float32":    float32(1.1),
+		"float64":    float64(2.64),
+	}
+	c(o, "nil", float32(0))
+	c(o, "struct", float32(0))
+	c(o, "z", float32(123))
+	c(o, "ze", float32(0))
+	c(o, "n", float32(-1))
+	c(o, "int", float32(1))
+	c(o, "int16", float32(20))
+	c(o, "int32", float32(32))
+	c(o, "int64", float32(64))
+	c(o, "uint", float32(123))
+	c(o, "uint32", float32(132))
+	c(o, "uint64", float32(164))
+	c(o, "interfaces", float32(1))
+	c(o, "einterface", float32(0))
+	c(o, "float32", float32(1.1))
+	c(o, "float64", float32(2.64))
 }
 
 func TestValues_Bool(t *testing.T) {
@@ -485,4 +580,43 @@ func TestRangeOrderedMap(t *testing.T) {
 		return true
 	})
 	assert.Equal(t, []string{"b", "c", "ya"}, keys)
+}
+
+func Test_MapAny_DB(t *testing.T) {
+	tcases := []struct {
+		val MapAny
+		exp string
+	}{
+		{val: MapAny{"one": "two"}, exp: "{\"one\":\"two\"}"},
+		{val: MapAny{}, exp: ""},
+		{val: nil, exp: ""},
+	}
+
+	for _, tc := range tcases {
+		dr, err := tc.val.Value()
+		require.NoError(t, err)
+
+		var drv string
+		if v, ok := dr.(string); ok {
+			drv = v
+		}
+		assert.Equal(t, tc.exp, drv)
+
+		var val2 MapAny
+		err = val2.Scan(dr)
+		require.NoError(t, err)
+		assert.Equal(t, len(tc.val), len(val2))
+	}
+
+	m1 := MapAny{"one": "two"}
+	m2 := MapAny{"three": "four"}
+
+	m1.Merge(m2)
+	assert.Equal(t, 2, len(m1))
+
+	var mm MapAny
+	mm.Merge(m2)
+	assert.Equal(t, 1, len(mm))
+	mm.Merge(m1)
+	assert.Equal(t, 2, len(mm))
 }
