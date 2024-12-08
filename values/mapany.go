@@ -2,6 +2,7 @@ package values
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"encoding/json"
 	"sort"
 	"time"
@@ -131,6 +132,22 @@ func (c MapAny) Int64(k string) int64 {
 	return Int64(c[k])
 }
 
+// Float64 will return the named value as a float64
+func (c MapAny) Float64(k string) float64 {
+	if c == nil {
+		return 0
+	}
+	return Float64(c[k])
+}
+
+// Float32 will return the named value as a float32
+func (c MapAny) Float32(k string) float32 {
+	if c == nil {
+		return 0
+	}
+	return Float32(c[k])
+}
+
 // GetOrSet existing existing value or set new value
 func (c MapAny) GetOrSet(key string, getter func(key string) any) any {
 	if c == nil {
@@ -165,6 +182,53 @@ func (c MapAny) Extract(path ...string) MapAny {
 	}
 
 	return m
+}
+
+// Merge merges maps
+func (c *MapAny) Merge(m MapAny) *MapAny {
+	if *c == nil {
+		*c = MapAny{}
+	}
+	for k, v := range m {
+		(*c)[k] = v
+	}
+	return c
+}
+
+// Scan implements the Scanner interface.
+func (c *MapAny) Scan(value any) error {
+	if value == nil {
+		*c = nil
+		return nil
+	}
+
+	var s []byte
+	switch vid := value.(type) {
+	case []byte:
+		s = vid
+	case string:
+		s = []byte(vid)
+	default:
+		return errors.Errorf("unsupported scan type: %T", value)
+	}
+
+	if len(s) == 0 {
+		*c = MapAny{}
+		return nil
+	}
+	return errors.WithStack(json.Unmarshal(s, c))
+}
+
+// Value implements the driver Valuer interface.
+func (c MapAny) Value() (driver.Value, error) {
+	if len(c) == 0 {
+		return nil, nil
+	}
+	value, err := json.Marshal(c)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return string(value), nil
 }
 
 // OrderedMapKeys returns ordered keys

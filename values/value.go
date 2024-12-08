@@ -255,6 +255,10 @@ func Int64(v any) int64 {
 		return int64(tv)
 	case uint64:
 		return int64(tv)
+	case float32:
+		return int64(tv)
+	case float64:
+		return int64(tv)
 	case string:
 		i64, err := strconv.ParseInt(tv, 10, 64)
 		if err != nil {
@@ -262,6 +266,90 @@ func Int64(v any) int64 {
 			return 0
 		}
 		return i64
+	default:
+		logger.KV(xlog.DEBUG, "reason", "unsupported", "val", v, "type", fmt.Sprintf("%T", v))
+		return 0
+	}
+}
+
+// Float32 will return the value as float32
+func Float32(v any) float32 {
+	if v == nil {
+		return 0
+	}
+	switch tv := v.(type) {
+	case []any:
+		if len(tv) > 0 {
+			return Float32(v.([]any)[0])
+		}
+		return 0
+	case int:
+		return float32(tv)
+	case int16:
+		return float32(tv)
+	case int32:
+		return float32(tv)
+	case int64:
+		return float32(tv)
+	case uint:
+		return float32(tv)
+	case uint32:
+		return float32(tv)
+	case uint64:
+		return float32(tv)
+	case float32:
+		return tv
+	case float64:
+		return float32(tv)
+	case string:
+		i64, err := strconv.ParseFloat(tv, 32)
+		if err != nil {
+			logger.KV(xlog.DEBUG, "val", v, "err", err.Error())
+			return 0
+		}
+		return float32(i64)
+	default:
+		logger.KV(xlog.DEBUG, "reason", "unsupported", "val", v, "type", fmt.Sprintf("%T", v))
+		return 0
+	}
+}
+
+// Float64 will return the value as float64
+func Float64(v any) float64 {
+	if v == nil {
+		return 0
+	}
+	switch tv := v.(type) {
+	case []any:
+		if len(tv) > 0 {
+			return Float64(v.([]any)[0])
+		}
+		return 0
+	case int:
+		return float64(tv)
+	case int16:
+		return float64(tv)
+	case int32:
+		return float64(tv)
+	case int64:
+		return float64(tv)
+	case uint:
+		return float64(tv)
+	case uint32:
+		return float64(tv)
+	case uint64:
+		return float64(tv)
+	case float32:
+		return float64(tv)
+	case float64:
+		return tv
+	case string:
+		i64, err := strconv.ParseFloat(tv, 64)
+		if err != nil {
+			logger.KV(xlog.DEBUG, "val", v, "err", err.Error())
+			return 0
+		}
+		return float64(i64)
 	default:
 		logger.KV(xlog.DEBUG, "reason", "unsupported", "val", v, "type", fmt.Sprintf("%T", v))
 		return 0
