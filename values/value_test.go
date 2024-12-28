@@ -44,7 +44,9 @@ jti: "123"
 	assert.Empty(t, c4.StringSlice("aud"))
 
 	assert.True(t, IsCollection(c4))
+	assert.True(t, IsMap(c4))
 	assert.True(t, IsCollection(c["aud"]))
+	assert.True(t, IsSlice(c["aud"]))
 	assert.False(t, IsCollection(c["jti"]))
 	assert.False(t, IsCollection(nil))
 }
@@ -72,9 +74,15 @@ func TestExtract(t *testing.T) {
 	assert.Nil(t, m.Extract("l1m", "foo"))
 	assert.Nil(t, m.Extract("l1m", "l2m", "l3s"))
 
-	m2 := m.Extract("l1m", "l2m", "l3m")
-	require.NotNil(t, m2)
-	assert.Equal(t, "string", m2.String("l4s"))
+	m2 := m.Extract("l1m", "l2m")
+	assert.True(t, m2.IsMap("l3m"))
+	assert.NotEmpty(t, m2.Map("l3m"))
+
+	m3 := m.Extract("l1m", "l2m", "l3m")
+	require.NotNil(t, m3)
+	assert.Equal(t, "string", m3.String("l4s"))
+	assert.True(t, m3.IsSlice("l4a"))
+	assert.NotEmpty(t, m3.Slice("l4a"))
 }
 
 type testStruct struct {

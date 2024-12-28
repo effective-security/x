@@ -148,6 +148,34 @@ func (c MapAny) Float32(k string) float32 {
 	return Float32(c[k])
 }
 
+func (c MapAny) IsSlice(k string) bool {
+	if c == nil {
+		return false
+	}
+	return IsSlice(c[k])
+}
+
+func (c MapAny) Slice(k string) []any {
+	if c == nil {
+		return nil
+	}
+	return c[k].([]any)
+}
+
+func (c MapAny) IsMap(k string) bool {
+	if c == nil {
+		return false
+	}
+	return IsMap(c[k])
+}
+
+func (c MapAny) Map(k string) MapAny {
+	if c == nil {
+		return nil
+	}
+	return c[k].(map[string]any)
+}
+
 // GetOrSet existing existing value or set new value
 func (c MapAny) GetOrSet(key string, getter func(key string) any) any {
 	if c == nil {
@@ -161,6 +189,7 @@ func (c MapAny) GetOrSet(key string, getter func(key string) any) any {
 	return v
 }
 
+// Extract extracts value from nested map using path of keys
 func (c MapAny) Extract(path ...string) MapAny {
 	if c == nil {
 		return nil

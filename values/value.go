@@ -365,6 +365,22 @@ func IsCollection(value any) bool {
 	return kind == reflect.Slice || kind == reflect.Map
 }
 
+func IsSlice(value any) bool {
+	if value == nil {
+		return false
+	}
+	kind := reflect.TypeOf(value).Kind()
+	return kind == reflect.Slice
+}
+
+func IsMap(value any) bool {
+	if value == nil {
+		return false
+	}
+	kind := reflect.TypeOf(value).Kind()
+	return kind == reflect.Map
+}
+
 // JSON returns the value as a JSON string
 func JSON(value any) string {
 	if value == nil {
