@@ -17,19 +17,19 @@ const (
 	Severity_Medium   Severity_Enum = 4
 	Severity_High     Severity_Enum = 8
 	Severity_Critical Severity_Enum = 16
-	Severity_All      Severity_Enum = 65535
+	Severity_All      Severity_Enum = 0x7fffffff
 )
 
 // Enum value maps for Severity_Enum.
 var (
 	Severity_Enum_name = map[int32]string{
-		0:     "Invalid",
-		1:     "Unknown",
-		2:     "Low",
-		4:     "Medium",
-		8:     "High",
-		16:    "Critical",
-		65535: "All",
+		0:          "Invalid",
+		1:          "Unknown",
+		2:          "Low",
+		4:          "Medium",
+		8:          "High",
+		16:         "Critical",
+		0x7fffffff: "All",
 	}
 	Severity_Enum_value = map[string]int32{
 		"Invalid":  0,
@@ -38,7 +38,7 @@ var (
 		"Medium":   4,
 		"High":     8,
 		"Critical": 16,
-		"All":      65535,
+		"All":      0x7fffffff,
 	}
 )
 
@@ -77,4 +77,10 @@ func Test_SupportedNames(t *testing.T) {
 	assert.Equal(t, []string{"High", "Critical"}, e.ValueNames())
 	assert.Equal(t, []Severity_Enum{Severity_High, Severity_Critical}, e.Flags())
 	assert.Equal(t, []int32{8, 16}, e.FlagsInt())
+
+	e = Severity_All
+	assert.Equal(t, "Unknown,Low,Medium,High,Critical", e.ValueString())
+	assert.Equal(t, []string{"Unknown", "Low", "Medium", "High", "Critical"}, e.ValueNames())
+	assert.Equal(t, []Severity_Enum{Severity_Unknown, Severity_Low, Severity_Medium, Severity_High, Severity_Critical}, e.Flags())
+	assert.Equal(t, []int32{1, 2, 4, 8, 16}, e.FlagsInt())
 }

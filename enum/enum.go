@@ -75,7 +75,7 @@ func FlagNames[E Names](val E) []string {
 	names := val.NamesMap()
 
 	var vals []string
-	for i := E(1); i <= val; i <<= 1 {
+	for i := E(1); i > 0 && i <= val; i <<= 1 {
 		if val&i == i {
 			name := names[int32(i)]
 			if name != "" {
@@ -88,9 +88,11 @@ func FlagNames[E Names](val E) []string {
 
 // FlagsInt returns list of enum values from flag
 func FlagsInt[E Names](val E) []int32 {
+	names := val.NamesMap()
+
 	var vals []int32
-	for i := E(1); i <= val; i <<= 1 {
-		if val&i == i {
+	for i := E(1); i > 0 && i <= val; i <<= 1 {
+		if val&i == i && names[int32(i)] != "" {
 			vals = append(vals, int32(i))
 		}
 	}
@@ -99,9 +101,11 @@ func FlagsInt[E Names](val E) []int32 {
 
 // FlagsInt returns list of enum values from flag
 func Flags[E Names](val E) []E {
+	names := val.NamesMap()
+
 	var vals []E
-	for i := E(1); i <= val; i <<= 1 {
-		if val&i == i {
+	for i := E(1); i > 0 && i <= val; i <<= 1 {
+		if val&i == i && names[int32(i)] != "" {
 			vals = append(vals, i)
 		}
 	}
