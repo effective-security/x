@@ -151,9 +151,9 @@ func BoolSlicesEqual(a, b []bool) bool {
 }
 
 // StringUpto returns the beginning of the string up to `max`
-func StringUpto(str string, max int) string {
-	if len(str) > max {
-		return str[:max]
+func StringUpto(str string, maxLen int) string {
+	if len(str) > maxLen {
+		return str[:maxLen]
 	}
 	return str
 }
@@ -270,10 +270,10 @@ func StringArrayToMap(arr []string) (map[string]string, error) {
 }
 
 // Replace replaces all occurrences of old with new in slice.
-func Replace[E comparable](slice []E, old, new E) {
+func Replace[E comparable](slice []E, old, newVal E) {
 	for i, v := range slice {
 		if v == old {
-			slice[i] = new
+			slice[i] = newVal
 		}
 	}
 }

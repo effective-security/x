@@ -1,9 +1,9 @@
 module github.com/effective-security/x
 
-go 1.23.5
+go 1.24.1
 
 require (
-	github.com/alecthomas/kong v0.9.0
+	github.com/alecthomas/kong v1.9.0
 	github.com/deckarep/golang-set v1.8.0
 	github.com/effective-security/xlog v0.9.39
 	github.com/oleiade/reflections v1.0.1
@@ -31,4 +31,4 @@ require (
 	honnef.co/go/tools v0.0.1-2019.2.3 // indirect
 )
 
-replace gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.2.8
+replace gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.4.0
