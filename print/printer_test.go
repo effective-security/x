@@ -136,6 +136,10 @@ func TestRegisterType(t *testing.T) {
   age: 25
 `
 	assert.Equal(t, exp, buf.String())
+
+	buf.Reset()
+	print.Object(&buf, "table", obj)
+	assert.Equal(t, exp, buf.String())
 }
 
 type testStruct struct {

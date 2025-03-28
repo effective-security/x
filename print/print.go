@@ -48,6 +48,8 @@ func Object(w io.Writer, format string, value any) {
 		Yaml(w, value)
 	} else if format == "json" {
 		JSON(w, value)
+	} else if printFunc, found := printRegistry[reflect.TypeOf(value)]; found {
+		printFunc(w, value)
 	} else if pr, ok := value.(Printer); ok {
 		pr.Print(w)
 	} else {
