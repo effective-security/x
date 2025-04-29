@@ -1,6 +1,7 @@
 package values
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -388,4 +389,24 @@ func JSON(value any) string {
 	}
 	b, _ := json.Marshal(value)
 	return string(b)
+}
+
+// JSONIndent returns the value as a JSON string with indentation
+func JSONIndent(value any) string {
+	if value == nil {
+		return ""
+	}
+	b, _ := json.MarshalIndent(value, "", "\t")
+	return string(b)
+}
+
+// IndentJSON indents a JSON string
+// It will return the original string if it fails to indent
+// This is useful for pretty printing JSON strings
+func IndentJSON(data string) string {
+	var buf bytes.Buffer
+	if err := json.Indent(&buf, []byte(data), "", "\t"); err == nil {
+		return buf.String()
+	}
+	return data
 }
