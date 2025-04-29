@@ -14,7 +14,21 @@ func TestValues(t *testing.T) {
 		"jti": "123",
 		"aud": []string{"t1"},
 	}
+	assert.True(t, IsMap(c))
+	assert.True(t, c.Has("jti"))
+	assert.True(t, c.Has("aud"))
+	assert.False(t, c.Has("aud2"))
+
 	assert.Equal(t, `{"aud":["t1"],"jti":"123"}`, c.JSON())
+	expIndent := `{
+	"aud": [
+		"t1"
+	],
+	"jti": "123"
+}`
+	assert.Equal(t, expIndent, c.JSONIndent())
+	assert.Equal(t, expIndent, IndentJSON(`{"aud":["t1"],"jti":"123"}`))
+
 	assert.Equal(t, `aud:
     - t1
 jti: "123"

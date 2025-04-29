@@ -64,14 +64,26 @@ func (c MapAny) To(val any) error {
 
 // JSON returns JSON encoded string
 func (c MapAny) JSON() string {
-	raw, _ := json.Marshal(c)
-	return string(raw)
+	return JSON(c)
+}
+
+func (c MapAny) JSONIndent() string {
+	return JSONIndent(c)
 }
 
 // YAML returns YAML encoded string
 func (c MapAny) YAML() string {
 	raw, _ := yaml.Marshal(c)
 	return string(raw)
+}
+
+// Has will return true if the map contains the key
+func (c MapAny) Has(k string) bool {
+	if c == nil {
+		return false
+	}
+	_, ok := c[k]
+	return ok
 }
 
 // String will return the value as a string,
