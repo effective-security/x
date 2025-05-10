@@ -66,11 +66,10 @@ func Test_SubfolderNames(t *testing.T) {
 
 	_, err = fileutil.SubfolderNames("./folders.go")
 	require.Error(t, err)
-	//
 	assert.Regexp(t,
     `^(readdirent|fdopendir) \./folders\.go: not a directory$`,
     err.Error(),
-)
+	)
 }
 
 func Test_FileNames(t *testing.T) {
