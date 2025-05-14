@@ -150,3 +150,41 @@ type testStruct struct {
 func (t *testStruct) Print(w io.Writer) {
 	print.JSON(w, t)
 }
+
+func Test_DocumentationOneLine(t *testing.T) {
+	w := bytes.NewBuffer([]byte{})
+
+	doc := `line 1
+with continuation
+	
+Line 2.
+
+Line 3
+`
+	print.TextOneLine(w, doc)
+	assert.Equal(t, `line 1 with continuation. Line 2. Line 3.`, w.String())
+
+	exp := `  line 1
+  with continuation
+  	
+  Line 2.
+  
+  Line 3
+  
+`
+	w.Reset()
+	print.Text(w, doc, "  ", false)
+	assert.Equal(t, exp, w.String())
+
+	exp = `line 1
+  with continuation
+  	
+  Line 2.
+  
+  Line 3
+  
+`
+	w.Reset()
+	print.Text(w, doc, "  ", true)
+	assert.Equal(t, exp, w.String())
+}

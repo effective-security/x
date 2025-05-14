@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/effective-security/x/slices"
 	"github.com/effective-security/x/values"
@@ -105,4 +107,47 @@ func Map(w io.Writer, header []string, vals map[string]string) {
 
 	table.Render()
 	fmt.Fprintln(w)
+}
+
+// Text prints text with indentation,
+// keeping the first line without indentation if noFirstIndent is true
+func Text(w io.Writer, doc string, indent string, noFirstIndent bool) {
+	if doc == "" {
+		return
+	}
+	parts := strings.Split(doc, "\n")
+	for idx, part := range parts {
+		if idx > 0 || !noFirstIndent {
+			fmt.Fprint(w, indent)
+		}
+		fmt.Fprintln(w, part)
+	}
+}
+
+// TextOneLine prints documentation text in one line
+func TextOneLine(w io.Writer, doc string) {
+	if doc == "" {
+		return
+	}
+	parts := strings.Split(doc, "\n")
+	lines := 0
+	prevPartDot := false
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		size := len(part)
+		if size > 0 {
+			if lines > 0 {
+				if !prevPartDot && unicode.IsUpper(rune(part[0])) {
+					fmt.Fprint(w, ".")
+				}
+				fmt.Fprint(w, " ")
+			}
+			fmt.Fprint(w, part)
+			prevPartDot = part[size-1] == '.'
+			lines++
+		}
+	}
+	if lines > 0 && !prevPartDot {
+		fmt.Fprint(w, ".")
+	}
 }
