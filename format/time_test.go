@@ -43,7 +43,11 @@ func TestParseTime(t *testing.T) {
 	t1u := format.ParseTime(t1.Unix())
 	assert.Equal(t, "2023-01-01T12:00:00Z", t1u.UTC().Format(time.RFC3339))
 
-	t2 := format.ParseTime(time.Now())
+	now := time.Now()
+	t2 := format.ParseTime(now)
+	assert.False(t, t2.IsZero())
+
+	t2 = format.ParseTime(&now)
 	assert.False(t, t2.IsZero())
 
 	t3 := format.ParseTime(nil)
@@ -107,6 +111,12 @@ func TestTimeAgo(t *testing.T) {
 
 	t3 := format.TimeAgo(now.Add(time.Minute))
 	assert.Equal(t, "in 1 minutes", t3)
+
+	t4 := format.TimeAgo(nil)
+	assert.Equal(t, "never", t4)
+
+	t5 := format.TimeAgo(&now)
+	assert.Equal(t, "just now", t5)
 }
 
 func TestTimeAg2(t *testing.T) {
