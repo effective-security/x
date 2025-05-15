@@ -55,6 +55,11 @@ func ParseTime(val any) time.Time {
 		return ParseStringTime(t)
 	case time.Time:
 		return t
+	case *time.Time:
+		if t == nil {
+			return time.Time{}
+		}
+		return *t
 	}
 	return time.Time{}
 }
@@ -72,6 +77,11 @@ func Time(val any) string {
 		return time.Unix(t, 0).Format("2006-01-02 15:04:05")
 	case string:
 		return t
+	case *time.Time:
+		if t == nil {
+			return "never"
+		}
+		return t.Format("2006-01-02 15:04:05")
 	case time.Time:
 		if t.IsZero() {
 			return "never"
@@ -89,6 +99,9 @@ func LocalTime(val any) string {
 
 // TimeAgo returns elapsed time since
 func TimeAgo(val any) string {
+	if val == nil {
+		return "never"
+	}
 	t := ParseTime(val).UTC()
 	now := NowFunc()
 
