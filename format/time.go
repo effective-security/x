@@ -84,7 +84,7 @@ func Time(val any) string {
 		return t.Format("2006-01-02 15:04:05")
 	case time.Time:
 		if t.IsZero() {
-			return "never"
+			return ""
 		}
 		return t.Format("2006-01-02 15:04:05")
 	}
@@ -152,10 +152,13 @@ func TimeAgo(val any) string {
 func TimesElapsed(from, to any) (created string, updated string, elapsed string) {
 	createdTime := ParseTime(from)
 	updatedTime := ParseTime(to)
-	elapsedTime := updatedTime.Sub(createdTime) / time.Second * time.Second
 
 	created = Time(createdTime)
 	updated = Time(updatedTime)
-	elapsed = elapsedTime.String()
+
+	if !createdTime.IsZero() && !updatedTime.IsZero() {
+		elapsedTime := updatedTime.Sub(createdTime) / time.Second * time.Second
+		elapsed = elapsedTime.String()
+	}
 	return
 }

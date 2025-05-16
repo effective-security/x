@@ -63,7 +63,7 @@ func TestFormatTime(t *testing.T) {
 	format.DefaultTimePrintFormat = "UTC"
 	assert.Equal(t, "2023-01-01T12:00:00Z", format.Time("2023-01-01T12:00:00Z"))
 	assert.Equal(t, "", format.Time(nil))
-	assert.Equal(t, "never", format.Time(time.Time{}))
+	assert.Equal(t, "", format.Time(time.Time{}))
 	assert.Equal(t, "2023-01-01 12:00:00", format.Time(time.Date(2023, 1, 1, 12, 0, 0, 0, time.Local)))
 	assert.Equal(t, "2023-01-01 12:00:00", format.Time(time.Date(2023, 1, 1, 12, 0, 0, 0, time.Local).Unix()))
 
@@ -145,4 +145,15 @@ func TestFormatTimesElapsed(t *testing.T) {
 	assert.Equal(t, "2023-01-01 12:00:00", created)
 	assert.Equal(t, "2023-01-01 14:00:00", updated)
 	assert.Equal(t, "2h0m0s", elapsed)
+
+	created, updated, elapsed = format.TimesElapsed("", to)
+	assert.Equal(t, "", created)
+	assert.Equal(t, "2023-01-01 14:00:00", updated)
+	assert.Equal(t, "", elapsed)
+
+	created, updated, elapsed = format.TimesElapsed(from, "")
+	assert.Equal(t, "2023-01-01 12:00:00", created)
+	assert.Equal(t, "", updated)
+	assert.Equal(t, "", elapsed)
+
 }
