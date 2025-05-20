@@ -43,9 +43,11 @@ func TestPrint(t *testing.T) {
 
 	buf.Reset()
 	print.Print(&buf, map[string]string{"key": "value"})
-	exp := `  KEY | VALUE  
-------+--------
-  key | value  
+	exp := `┌─────┬───────┐
+│ KEY │ VALUE │
+├─────┼───────┤
+│ key │ value │
+└─────┴───────┘
 
 `
 	assert.Equal(t, exp, buf.String())
@@ -96,9 +98,11 @@ func TestStrings(t *testing.T) {
 func TestMap(t *testing.T) {
 	var buf bytes.Buffer
 	print.Map(&buf, []string{"Key", "Value"}, map[string]string{"key": "value"})
-	exp := `  KEY | VALUE  
-------+--------
-  key | value  
+	exp := `┌─────┬───────┐
+│ KEY │ VALUE │
+├─────┼───────┤
+│ key │ value │
+└─────┴───────┘
 
 `
 	assert.Equal(t, exp, buf.String())
