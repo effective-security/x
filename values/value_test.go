@@ -1,7 +1,9 @@
 package values
 
 import (
+	"errors"
 	"math"
+	"sort"
 	"testing"
 	"time"
 
@@ -641,4 +643,49 @@ func Test_MapAny_DB(t *testing.T) {
 	assert.Equal(t, 1, len(mm))
 	mm.Merge(m1)
 	assert.Equal(t, 2, len(mm))
+}
+
+func Test_TraverseSubMaps(t *testing.T) {
+	m := FromJSON(`{
+	"one":  {"two": {"three": "four"}},
+	"five": "six",
+	"bool": {
+		"filter": [
+			{"term1": {"status": "1"}},
+			{"term2": {"class": "2"}},
+			{"term3": {"enum": 3}}
+		]
+	},
+	"ints": [1,2,3,4]
+}`)
+	require.NotNil(t, m)
+
+	var keys []string
+	err := m.TraverseSubMaps(func(k string, v MapAny) (bool, error) {
+		keys = append(keys, k)
+		return true, nil
+	})
+	require.NoError(t, err)
+	sort.Strings(keys)
+	assert.Equal(t, []string{"bool", "one", "term1", "term2", "term3", "two"}, keys)
+
+	err = m.TraverseSubMaps(func(k string, v MapAny) (bool, error) {
+		if k == "two" {
+			return false, nil
+		}
+		keys = append(keys, k)
+		return true, nil
+	})
+	require.NoError(t, err)
+	sort.Strings(keys)
+	assert.Equal(t, []string{"bool", "bool", "one", "one", "term1", "term1", "term2", "term2", "term3", "term3", "two"}, keys)
+
+	err = m.TraverseSubMaps(func(k string, v MapAny) (bool, error) {
+		if k == "two" {
+			return false, errors.New("stop")
+		}
+		keys = append(keys, k)
+		return true, nil
+	})
+	assert.EqualError(t, err, "stop")
 }

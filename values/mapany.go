@@ -188,7 +188,7 @@ func (c MapAny) Map(k string) MapAny {
 	return c[k].(map[string]any)
 }
 
-// GetOrSet existing existing value or set new value
+// GetOrSet returns existing value or set new value
 func (c MapAny) GetOrSet(key string, getter func(key string) any) any {
 	if c == nil {
 		return nil
@@ -223,6 +223,43 @@ func (c MapAny) Extract(path ...string) MapAny {
 	}
 
 	return m
+}
+
+func (c MapAny) TraverseSubMaps(f func(k string, v MapAny) (bool, error)) error {
+	if c == nil {
+		return nil
+	}
+	for k, obj := range c {
+		if IsMap(obj) {
+			objMap := obj.(map[string]any)
+			ok, err := f(k, objMap)
+			if err != nil {
+				return err
+			}
+			if !ok {
+				return nil
+			}
+			subMap := MapAny(objMap)
+			err = subMap.TraverseSubMaps(f)
+			if err != nil {
+				return err
+			}
+		} else if IsSlice(obj) {
+			if objSlice, ok := obj.([]any); ok {
+				for _, item := range objSlice {
+					if IsMap(item) {
+						itemMap := item.(map[string]any)
+						subMap := MapAny(itemMap)
+						err := subMap.TraverseSubMaps(f)
+						if err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // Merge merges maps
