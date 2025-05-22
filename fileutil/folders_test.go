@@ -65,7 +65,11 @@ func Test_SubfolderNames(t *testing.T) {
 	assert.EqualError(t, err, "open ./notfound: no such file or directory")
 
 	_, err = fileutil.SubfolderNames("./folders.go")
-	assert.EqualError(t, err, "readdirent ./folders.go: not a directory")
+	require.Error(t, err)
+	assert.Regexp(t,
+    `^(readdirent|fdopendir) \./folders\.go: not a directory$`,
+    err.Error(),
+	)
 }
 
 func Test_FileNames(t *testing.T) {
