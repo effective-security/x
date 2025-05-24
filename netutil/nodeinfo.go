@@ -3,7 +3,7 @@ package netutil
 import (
 	"os"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 // NodeInfo is an interface to provide host and IP address for the node in the cluster.

@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/xlog"
-	"github.com/pkg/errors"
 )
 
 // Expander is used to expand variables in the input object

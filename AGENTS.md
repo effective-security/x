@@ -5,7 +5,7 @@
   - use `assert` when test can continue and print failed cases
 2. Tests should be table‑driven and use `t.Run` when applicable.
 3. Tests should use `t.Parallel` when appropriate.
-4. To return an error always use "github.com/pkg/errors" package:
+4. To return an error always use "github.com/cockroachdb/errors" package:
   Use `Wrap`, `Wrapf` to wrap errors from external packages that do not wrap an error.
   Use `WithMessage`, `WithMessagef` to annotate a wrapped error.
   Use `errors.Errorf` or `errors.New` to return new error.
@@ -13,7 +13,8 @@
 6. Use `make lint` to check format and lint errors, no approval needed.
 
 # Execution plan
-1. Replace `fmt.Error` with `errors` package
+1. Replace "github.com/pkh/errors" with "github.com/cockroachdb/errors"
+  - Replace `fmt.Error` with `cockroachdb/errors` package
 2. Replace in tests `t.Fail`, `t.Error` etc with `require` and `assert` style.
 3. Add or improve package documentation
 4. Document or improve missing documentation for interfaces, functions and structs.

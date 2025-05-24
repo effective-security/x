@@ -3,7 +3,7 @@ package fileutil
 import (
 	"os"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 // FolderExists ensures that folder exists

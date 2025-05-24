@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 // ParseURLs creates a list of URLs from lists of hosts

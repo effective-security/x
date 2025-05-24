@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/x/fileutil/resolve"
 	"github.com/effective-security/x/netutil"
 	"github.com/effective-security/xlog"
 	"github.com/oleiade/reflections"
-	"github.com/pkg/errors"
 	yamlcfg "go.uber.org/config"
 	"gopkg.in/yaml.v3"
 )

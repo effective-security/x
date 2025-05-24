@@ -6,8 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/xlog"
-	"github.com/pkg/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/x/fileutil", "reloader")
