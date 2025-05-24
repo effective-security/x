@@ -5,10 +5,13 @@ import (
 	"fmt"
 )
 
+// randRead is the function used to read random bytes; it can be overridden for testing.
+var randRead = rand.Read
+
 // MustCreate returns GUID
 func MustCreate() string {
 	b := make([]byte, 16)
-	_, err := rand.Read(b)
+	_, err := randRead(b)
 	if err != nil {
 		panic(err)
 	}

@@ -1,7 +1,6 @@
 package flake
 
 import (
-	"fmt"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -9,6 +8,7 @@ import (
 	"time"
 
 	mapset "github.com/deckarep/golang-set"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -131,11 +131,8 @@ func TestFlakeInParallel(t *testing.T) {
 	set := mapset.NewSet()
 	for i := 0; i < numID*numGenerator; i++ {
 		id := <-consumer
-		if set.Contains(id) {
-			t.Fatal("duplicated id")
-		} else {
-			set.Add(id)
-		}
+		require.False(t, set.Contains(id), "duplicated id")
+		set.Add(id)
 
 		parts := Decompose(id)
 
@@ -157,11 +154,8 @@ func TestIdGenerator(t *testing.T) {
 	totalCount := uint64(0)
 	useCode := func(code uint64) error {
 		atomic.AddUint64(&totalCount, 1)
-		if set.Contains(code) {
-			t.Fatal("duplicated id")
-		} else {
-			set.Add(code)
-		}
+		require.False(t, set.Contains(code), "duplicated id")
+		set.Add(code)
 		return nil
 	}
 
@@ -202,7 +196,7 @@ func TestNilFlake(t *testing.T) {
 
 	var noMachineID Settings
 	noMachineID.MachineID = func() (uint16, error) {
-		return 0, fmt.Errorf("no machine id")
+		return 0, errors.New("no machine id")
 	}
 
 	assert.Panics(t, func() {
