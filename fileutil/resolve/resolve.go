@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 // Directory returns absolute dir name relative to baseDir,

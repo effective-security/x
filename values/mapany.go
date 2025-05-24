@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/xlog"
-	"github.com/pkg/errors"
 	"golang.org/x/exp/constraints"
 	"gopkg.in/yaml.v3"
 )

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/x/configloader"
 	"github.com/effective-security/x/guid"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

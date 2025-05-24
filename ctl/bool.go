@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/kong"
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 type boolPtrMapper struct{}
