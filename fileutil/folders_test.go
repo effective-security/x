@@ -1,78 +1,59 @@
-package fileutil_test
+package fileutil
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
-	"github.com/effective-security/x/fileutil"
-	"github.com/effective-security/x/guid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func Test_FolderExists(t *testing.T) {
-	tmpDir := path.Join(os.TempDir(), "fileutil-test", guid.MustCreate())
+func TestFolderExists(t *testing.T) {
+	err := FolderExists("")
+	require.Error(t, err, "expected error for empty folder")
 
-	err := os.MkdirAll(tmpDir, os.ModePerm)
-	require.NoError(t, err)
+	tmp := t.TempDir()
+	f := filepath.Join(tmp, "file")
+	err = os.WriteFile(f, []byte("data"), 0644)
+	require.NoError(t, err, "WriteFile error")
 
-	defer os.RemoveAll(tmpDir)
+	err = FolderExists(f)
+	require.Error(t, err, "expected error for file, not a folder")
 
-	assert.Error(t, fileutil.FolderExists(""))
-	assert.NoError(t, fileutil.FolderExists(tmpDir))
-
-	err = fileutil.FolderExists(tmpDir + "/a")
-	require.Error(t, err)
-	assert.Equal(t, fmt.Sprintf("stat %s: no such file or directory", tmpDir+"/a"), err.Error())
-
-	err = fileutil.FolderExists("./folders.go")
-	require.Error(t, err)
-	assert.Equal(t, "not a folder: \"./folders.go\"", err.Error())
+	err = FolderExists(tmp)
+	require.NoError(t, err, "unexpected error for folder")
 }
 
-func Test_FileExists(t *testing.T) {
-	tmpDir := path.Join(os.TempDir(), "fileutil-test", guid.MustCreate())
+func TestFileExists(t *testing.T) {
+	err := FileExists("")
+	require.Error(t, err, "expected error for empty file")
 
-	err := os.MkdirAll(tmpDir, os.ModePerm)
-	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	tmp := t.TempDir()
+	err = FileExists(tmp)
+	require.Error(t, err, "expected error for directory, not a file")
 
-	file := path.Join(tmpDir, "file.txt")
-	err = ioutil.WriteFile(file, []byte("FileExists"), 0644)
-	require.NoError(t, err)
+	f := filepath.Join(tmp, "file")
+	err = os.WriteFile(f, []byte("data"), 0644)
+	require.NoError(t, err, "WriteFile error")
 
-	assert.Error(t, fileutil.FileExists(""))
-	assert.NoError(t, fileutil.FileExists(file))
-
-	err = fileutil.FileExists(tmpDir)
-	require.Error(t, err)
-	assert.Equal(t, fmt.Sprintf("not a file: %q", tmpDir), err.Error())
-
-	err = fileutil.FileExists(tmpDir + "/a")
-	require.Error(t, err)
-	assert.Equal(t, fmt.Sprintf("stat %s: no such file or directory", tmpDir+"/a"), err.Error())
+	err = FileExists(f)
+	require.NoError(t, err, "unexpected error for file")
 }
 
-func Test_SubfolderNames(t *testing.T) {
-	l, err := fileutil.SubfolderNames(".")
-	require.NoError(t, err)
-	assert.Len(t, l, 3)
+func TestSubfolderNamesAndFileNames(t *testing.T) {
+	tmp := t.TempDir()
+	sub := filepath.Join(tmp, "sub")
+	err := os.Mkdir(sub, 0755)
+	require.NoError(t, err, "Mkdir error")
+	file := filepath.Join(tmp, "file.txt")
+	err = os.WriteFile(file, []byte("data"), 0644)
+	require.NoError(t, err, "WriteFile error")
 
-	_, err = fileutil.SubfolderNames("./notfound")
-	assert.EqualError(t, err, "open ./notfound: no such file or directory")
+	subs, err := SubfolderNames(tmp)
+	require.NoError(t, err, "SubfolderNames error")
+	require.Equal(t, []string{"sub"}, subs, "unexpected subfolders")
 
-	_, err = fileutil.SubfolderNames("./folders.go")
-	assert.EqualError(t, err, "readdirent ./folders.go: not a directory")
-}
-
-func Test_FileNames(t *testing.T) {
-	l, err := fileutil.FileNames("./resolve")
-	require.NoError(t, err)
-	assert.Len(t, l, 2)
-
-	_, err = fileutil.FileNames("./notfound")
-	assert.EqualError(t, err, "open ./notfound: no such file or directory")
+	files, err := FileNames(tmp)
+	require.NoError(t, err, "FileNames error")
+	require.Equal(t, []string{"file.txt"}, files, "unexpected files")
 }

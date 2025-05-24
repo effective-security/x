@@ -80,7 +80,7 @@ func mustNew(t *testing.T, cli interface{}, options ...kong.Option) *kong.Kong {
 		kong.Name("test"),
 		kong.Exit(func(int) {
 			t.Helper()
-			t.Fatalf("unexpected exit()")
+			require.FailNow(t, "unexpected exit()")
 		}),
 		BoolPtrMapper,
 	}, options...)
