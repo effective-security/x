@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -56,4 +57,7 @@ func TestSubfolderNamesAndFileNames(t *testing.T) {
 	files, err := FileNames(tmp)
 	require.NoError(t, err, "FileNames error")
 	require.Equal(t, []string{"file.txt"}, files, "unexpected files")
+
+	_, err = FileNames("not found")
+	assert.EqualError(t, err, "open not found: no such file or directory")
 }
