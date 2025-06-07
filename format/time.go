@@ -64,6 +64,8 @@ func ParseTime(val any) time.Time {
 	return time.Time{}
 }
 
+const timeFormat = "2006-01-02 15:04:05"
+
 // Time returns formatted time
 func Time(val any) string {
 	if strings.EqualFold(DefaultTimePrintFormat, "Local") {
@@ -74,19 +76,19 @@ func Time(val any) string {
 
 	switch t := val.(type) {
 	case int64:
-		return time.Unix(t, 0).Format("2006-01-02 15:04:05")
+		return time.Unix(t, 0).UTC().Format(timeFormat)
 	case string:
 		return t
 	case *time.Time:
 		if t == nil {
 			return "never"
 		}
-		return t.Format("2006-01-02 15:04:05")
+		return t.UTC().Format(timeFormat)
 	case time.Time:
 		if t.IsZero() {
 			return ""
 		}
-		return t.Format("2006-01-02 15:04:05")
+		return t.UTC().Format(timeFormat)
 	}
 	return ""
 }
@@ -94,7 +96,7 @@ func Time(val any) string {
 // LocalTime returns local time
 func LocalTime(val any) string {
 	t := ParseTime(val)
-	return t.Local().Format("2006-01-02 15:04:05")
+	return t.Local().Format(timeFormat)
 }
 
 // TimeAgo returns elapsed time since
