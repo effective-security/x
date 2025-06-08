@@ -194,3 +194,49 @@ func Split(src string) (entries []string) {
 	}
 	return
 }
+
+func TextWithIndent(doc string, indent string, noFirstIndent bool) string {
+	if doc == "" {
+		return ""
+	}
+	var buf strings.Builder
+	parts := strings.Split(doc, "\n")
+	for idx, part := range parts {
+		if idx > 0 || !noFirstIndent {
+			buf.WriteString(indent)
+		}
+		buf.WriteString(part)
+		buf.WriteString("\n")
+	}
+	return buf.String()
+}
+
+func TextOneLine(doc string) string {
+	if doc == "" {
+		return ""
+	}
+
+	var buf strings.Builder
+	parts := strings.Split(doc, "\n")
+	lines := 0
+	prevPartDot := false
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		size := len(part)
+		if size > 0 {
+			if lines > 0 {
+				if !prevPartDot && unicode.IsUpper(rune(part[0])) {
+					buf.WriteString(".")
+				}
+				buf.WriteString(" ")
+			}
+			buf.WriteString(part)
+			prevPartDot = part[size-1] == '.'
+			lines++
+		}
+	}
+	if lines > 0 && !prevPartDot {
+		buf.WriteString(".")
+	}
+	return buf.String()
+}
