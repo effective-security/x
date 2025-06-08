@@ -75,3 +75,34 @@ func Test_DisplayName(t *testing.T) {
 	assert.Equal(t, "S3 Location", format.DisplayName("S3Location"))
 	assert.Equal(t, "EC2 Instance", format.DisplayName("EC2Instance"))
 }
+
+func Test_TextOneLine(t *testing.T) {
+	doc := `line 1
+with continuation
+	
+Line 2.
+
+Line 3
+`
+	assert.Equal(t, `line 1 with continuation. Line 2. Line 3.`, format.TextOneLine(doc))
+
+	exp := `  line 1
+  with continuation
+  	
+  Line 2.
+  
+  Line 3
+  
+`
+	assert.Equal(t, exp, format.TextWithIndent(doc, "  ", false))
+
+	exp = `line 1
+  with continuation
+  	
+  Line 2.
+  
+  Line 3
+  
+`
+	assert.Equal(t, exp, format.TextWithIndent(doc, "  ", true))
+}
