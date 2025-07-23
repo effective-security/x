@@ -2,29 +2,41 @@ package ticker
 
 import (
 	"context"
+	"sync"
 	"time"
 )
 
-type Ticker struct {
+type Ticker[T any] struct {
 	ticker *time.Ticker
-	status string
+	value  T
 	count  int
+	lock   sync.RWMutex
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
-func New(ctx context.Context, every time.Duration, run func(ctx context.Context, status string, count int)) *Ticker {
-	t := &Ticker{
+func New[T any](ctx context.Context, every time.Duration, run func(ctx context.Context, value T, count int)) *Ticker[T] {
+	tickerCtx, cancel := context.WithCancel(ctx)
+	t := &Ticker[T]{
 		ticker: time.NewTicker(every),
+		ctx:    tickerCtx,
+		cancel: cancel,
 	}
 
 	go func() {
 		for {
 			select {
-			case <-ctx.Done():
-				t.Stop()
+			case <-tickerCtx.Done():
+				t.close()
 				return
 			case <-t.ticker.C:
+				t.lock.Lock()
 				t.count++
-				run(ctx, t.status, t.count)
+				value := t.value
+				count := t.count
+				t.lock.Unlock()
+
+				run(tickerCtx, value, count)
 			}
 		}
 	}()
@@ -32,29 +44,53 @@ func New(ctx context.Context, every time.Duration, run func(ctx context.Context,
 	return t
 }
 
-func (t *Ticker) Stop() {
-	if t != nil && t.ticker != nil {
-		t.ticker.Stop()
-		//t.ticker = nil
-	}
-}
-
-func (t *Ticker) GetStatus() string {
+func (t *Ticker[T]) Stop() {
 	if t == nil {
-		return ""
+		return
 	}
-	return t.status
-}
 
-func (t *Ticker) SetStatus(status string) {
-	if t != nil {
-		t.status = status
+	// Cancel the context first to stop the goroutine
+	if t.cancel != nil {
+		t.cancel()
 	}
 }
 
-func (t *Ticker) Count() int {
+func (t *Ticker[T]) close() {
+	if t == nil {
+		return
+	}
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	if t.ticker != nil {
+		t.ticker.Stop()
+		t.ticker = nil
+	}
+}
+
+func (t *Ticker[T]) GetValue() T {
+	if t == nil {
+		var empty T
+		return empty
+	}
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+	return t.value
+}
+
+func (t *Ticker[T]) SetValue(value T) {
+	if t == nil {
+		return
+	}
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	t.value = value
+}
+
+func (t *Ticker[T]) Count() int {
 	if t == nil {
 		return 0
 	}
+	t.lock.RLock()
+	defer t.lock.RUnlock()
 	return t.count
 }
