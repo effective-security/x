@@ -28,7 +28,7 @@ func TestTickerWithCancel(t *testing.T) {
 		runCount++
 	}
 
-	ticker := New(ctx, 100*time.Millisecond, runFunc)
+	ticker := New(ctx, 100*time.Millisecond, "running", runFunc)
 	defer ticker.Stop()
 
 	time.Sleep(350 * time.Millisecond)
@@ -63,9 +63,9 @@ func TestTickerWithStop(t *testing.T) {
 		runCount++
 	}
 
-	ticker := New(ctx, 50*time.Millisecond, runFunc)
+	ticker := New(ctx, 50*time.Millisecond, "running", runFunc)
 	time.Sleep(350 * time.Millisecond)
 	ticker.Stop()
 	time.Sleep(50 * time.Millisecond)
-	assert.Greater(t, runCount, 0)
+	assert.Greater(t, runCount, 4)
 }
