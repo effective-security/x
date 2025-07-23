@@ -1,8 +1,0 @@
-linters:
-  enable:
-    - revive
-
-issues:
-  exclude-files:
-    - ".*_test\\.go$"
-  exclude:

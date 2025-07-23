@@ -272,7 +272,7 @@ func (f *Factory) userName() string {
 
 func (f *Factory) normalizedUserName() string {
 	username := f.userName()
-	return strings.Replace(username, ".", "", -1)
+	return strings.ReplaceAll(username, ".", "")
 }
 
 func userName() string {
