@@ -15,11 +15,12 @@ type Ticker[T any] struct {
 	cancel context.CancelFunc
 }
 
-func New[T any](ctx context.Context, every time.Duration, run func(ctx context.Context, value T, count int)) *Ticker[T] {
+func New[T any](ctx context.Context, every time.Duration, value T, run func(ctx context.Context, value T, count int)) *Ticker[T] {
 	tickerCtx, cancel := context.WithCancel(ctx)
 	t := &Ticker[T]{
 		ticker: time.NewTicker(every),
 		ctx:    tickerCtx,
+		value:  value,
 		cancel: cancel,
 	}
 
