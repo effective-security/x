@@ -31,6 +31,11 @@ func New[T any](ctx context.Context, every time.Duration, value T, run func(ctx 
 				t.close()
 				return
 			case <-t.ticker.C:
+				// Check if context is cancelled before executing the callback
+				if tickerCtx.Err() != nil {
+					return
+				}
+
 				t.lock.Lock()
 				t.count++
 				value := t.value
