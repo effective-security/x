@@ -1,4 +1,4 @@
-package values
+package maps_test
 
 import (
 	"fmt"
@@ -6,10 +6,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/effective-security/x/maps"
 )
 
 func TestSyncMapStringInt(t *testing.T) {
-	m := SyncMap[string, int]{}
+	m := maps.SyncMap[string, int]{}
 
 	// Test Store and Load
 	m.Store("a", 1)
@@ -64,7 +66,7 @@ func TestSyncMapStringInt(t *testing.T) {
 }
 
 func TestSyncMapIntString(t *testing.T) {
-	m := SyncMap[int, string]{}
+	m := maps.SyncMap[int, string]{}
 
 	m.Store(1, "one")
 	m.Store(2, "two")
@@ -102,7 +104,7 @@ func TestSyncMapIntString(t *testing.T) {
 }
 
 func TestSyncMapFloat64Bool(t *testing.T) {
-	m := SyncMap[float64, bool]{}
+	m := maps.SyncMap[float64, bool]{}
 
 	m.Store(1.5, true)
 	m.Store(2.7, false)
@@ -154,7 +156,7 @@ func TestSyncMapStructTypes(t *testing.T) {
 		Country string
 	}
 
-	m := SyncMap[Person, Address]{}
+	m := maps.SyncMap[Person, Address]{}
 
 	person1 := Person{Name: "Alice", Age: 30}
 	person2 := Person{Name: "Bob", Age: 25}
@@ -199,7 +201,7 @@ func TestSyncMapStructTypes(t *testing.T) {
 }
 
 func TestSyncMapSliceTypes(t *testing.T) {
-	m := SyncMap[string, []int]{}
+	m := maps.SyncMap[string, []int]{}
 
 	m.Store("evens", []int{2, 4, 6, 8})
 	m.Store("odds", []int{1, 3, 5, 7})
@@ -239,7 +241,7 @@ func TestSyncMapSliceTypes(t *testing.T) {
 }
 
 func TestSyncMapEmptyMap(t *testing.T) {
-	m := SyncMap[string, int]{}
+	m := maps.SyncMap[string, int]{}
 
 	// Test Load on empty map
 	val, ok := m.Load("any")
@@ -262,7 +264,7 @@ func TestSyncMapEmptyMap(t *testing.T) {
 }
 
 func TestSyncMapRangeEarlyReturn(t *testing.T) {
-	m := SyncMap[int, string]{}
+	m := maps.SyncMap[int, string]{}
 
 	for i := 1; i <= 10; i++ {
 		m.Store(i, fmt.Sprintf("value-%d", i))
@@ -281,7 +283,7 @@ func TestSyncMapRangeEarlyReturn(t *testing.T) {
 }
 
 func TestSyncMapConcurrentAccess(t *testing.T) {
-	m := SyncMap[int, string]{}
+	m := maps.SyncMap[int, string]{}
 	done := make(chan bool)
 
 	// Start goroutines to concurrently access the map
@@ -316,7 +318,7 @@ func TestSyncMapConcurrentAccess(t *testing.T) {
 }
 
 func TestSyncMapPointerTypes(t *testing.T) {
-	m := SyncMap[string, *int]{}
+	m := maps.SyncMap[string, *int]{}
 
 	val1 := 42
 	val2 := 100
@@ -357,7 +359,7 @@ func TestSyncMapPointerTypes(t *testing.T) {
 }
 
 func TestSyncMapInterfaceTypes(t *testing.T) {
-	m := SyncMap[string, interface{}]{}
+	m := maps.SyncMap[string, interface{}]{}
 
 	m.Store("string", "hello")
 	m.Store("int", 42)
@@ -411,7 +413,7 @@ func TestSyncMapInterfaceTypes(t *testing.T) {
 }
 
 func TestSyncMapZeroValueHandling(t *testing.T) {
-	m := SyncMap[string, int]{}
+	m := maps.SyncMap[string, int]{}
 
 	// Test that zero values are handled correctly
 	val, ok := m.Load("nonexistent")
@@ -423,13 +425,13 @@ func TestSyncMapZeroValueHandling(t *testing.T) {
 	assert.Equal(t, 0, val)
 
 	// Test with bool type
-	mBool := SyncMap[string, bool]{}
+	mBool := maps.SyncMap[string, bool]{}
 	valBool, ok := mBool.Load("nonexistent")
 	assert.False(t, ok)
 	assert.False(t, valBool) // zero value for bool
 
 	// Test with string type
-	mStr := SyncMap[string, string]{}
+	mStr := maps.SyncMap[string, string]{}
 	valStr, ok := mStr.Load("nonexistent")
 	assert.False(t, ok)
 	assert.Equal(t, "", valStr) // zero value for string
