@@ -21,13 +21,13 @@ type Expander struct {
 // The values started with env:// , file:// or secret:// must be resolved.
 // The values inside ${} will be tried to be resolved,
 // if not found will be substiduted with empy values as per os.Getenv function.
-func ExpandAll(obj interface{}) error {
+func ExpandAll(obj any) error {
 	e := Expander{SecretProvider: SecretProviderInstance}
 	return e.ExpandAll(obj)
 }
 
 // ExpandAll replace variables in the input object
-func (f *Expander) ExpandAll(obj interface{}) error {
+func (f *Expander) ExpandAll(obj any) error {
 	return f.doSubstituteEnvVars(reflect.ValueOf(obj))
 }
 

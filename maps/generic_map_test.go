@@ -359,7 +359,7 @@ func TestSyncMapPointerTypes(t *testing.T) {
 }
 
 func TestSyncMapInterfaceTypes(t *testing.T) {
-	m := maps.SyncMap[string, interface{}]{}
+	m := maps.SyncMap[string, any]{}
 
 	m.Store("string", "hello")
 	m.Store("int", 42)
@@ -398,13 +398,13 @@ func TestSyncMapInterfaceTypes(t *testing.T) {
 
 	m.Delete("bool")
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"string": "hello",
 		"slice":  []int{1, 2, 3},
 		"float":  3.14,
 	}
-	actual := make(map[string]interface{})
-	m.Range(func(key string, value interface{}) bool {
+	actual := make(map[string]any)
+	m.Range(func(key string, value any) bool {
 		actual[key] = value
 		return true
 	})
