@@ -66,7 +66,7 @@ func ResolveValueWithSecrets(val string, loader SecretProvider) (string, error) 
 }
 
 // UnmarshalAndExpand load JSON or YAML file to an interface and expands variables
-func UnmarshalAndExpand(file string, v interface{}) error {
+func UnmarshalAndExpand(file string, v any) error {
 	err := Unmarshal(file, v)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func UnmarshalAndExpand(file string, v interface{}) error {
 }
 
 // Unmarshal JSON or YAML file to an interface
-func Unmarshal(file string, v interface{}) error {
+func Unmarshal(file string, v any) error {
 	b, err := os.ReadFile(file)
 	if err != nil {
 		return errors.WithMessagef(err, "unable to read file")
@@ -97,7 +97,7 @@ func Unmarshal(file string, v interface{}) error {
 }
 
 // Marshal saves object to file
-func Marshal(fn string, value interface{}) error {
+func Marshal(fn string, value any) error {
 	var data []byte
 	var err error
 	if strings.HasSuffix(fn, ".json") {

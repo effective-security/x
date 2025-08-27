@@ -74,7 +74,7 @@ func TestVersionFlag(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func mustNew(t *testing.T, cli interface{}, options ...kong.Option) *kong.Kong {
+func mustNew(t *testing.T, cli any, options ...kong.Option) *kong.Kong {
 	t.Helper()
 	options = append([]kong.Option{
 		kong.Name("test"),

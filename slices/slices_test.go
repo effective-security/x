@@ -48,7 +48,7 @@ func TestSlices_CloneStrings(t *testing.T) {
 func TestSlices_ContainsString(t *testing.T) {
 	s := []string{"a", "b", "c", "foo", "bar", "qux"}
 	missing := []string{"bob", "quxx"}
-	testSlicesContains(t, s, missing, "q", func(items interface{}, item interface{}) bool {
+	testSlicesContains(t, s, missing, "q", func(items any, item any) bool {
 		return ContainsString(items.([]string), item.(string))
 	})
 	if ContainsString(nil, "") {
@@ -110,7 +110,7 @@ func TestSlices_StringStartsWithOneOf(t *testing.T) {
 	}
 }
 
-func testSlicesContains(t *testing.T, items interface{}, missing interface{}, newItem interface{}, containsFunc func(items interface{}, item interface{}) bool) {
+func testSlicesContains(t *testing.T, items any, missing any, newItem any, containsFunc func(items any, item any) bool) {
 	vm := reflect.ValueOf(missing)
 	for i := 0; i < vm.Len(); i++ {
 		if containsFunc(items, vm.Index(i).Interface()) {
@@ -133,7 +133,7 @@ func testSlicesContains(t *testing.T, items interface{}, missing interface{}, ne
 }
 
 func TestSlices_ByteSlicesEqual(t *testing.T) {
-	bytes := []interface{}{
+	bytes := []any{
 		[]byte{},
 		[]byte{1},
 		[]byte{1, 2, 3},
@@ -141,7 +141,7 @@ func TestSlices_ByteSlicesEqual(t *testing.T) {
 		[]byte{2, 2, 3, 4},
 		[]byte{1, 2, 3, 5},
 	}
-	testSlicesEquals(t, "Byte", bytes, bytes[2], []byte{1, 2, 3}, func(x, y interface{}) bool {
+	testSlicesEquals(t, "Byte", bytes, bytes[2], []byte{1, 2, 3}, func(x, y any) bool {
 		return ByteSlicesEqual(x.([]byte), y.([]byte))
 	})
 	if ByteSlicesEqual(nil, []byte{1}) || ByteSlicesEqual([]byte{1}, nil) {
@@ -153,7 +153,7 @@ func TestSlices_ByteSlicesEqual(t *testing.T) {
 }
 
 func TestSlices_StringSlicesEqual(t *testing.T) {
-	strings := []interface{}{
+	strings := []any{
 		[]string{},
 		[]string{""},
 		[]string{"aa"},
@@ -162,7 +162,7 @@ func TestSlices_StringSlicesEqual(t *testing.T) {
 		[]string{"bb", "bb", "cc"},
 		[]string{"aa", "bb", "bb"},
 	}
-	testSlicesEquals(t, "String", strings, []string{"aa", "bb", "cc"}, strings[4], func(x, y interface{}) bool {
+	testSlicesEquals(t, "String", strings, []string{"aa", "bb", "cc"}, strings[4], func(x, y any) bool {
 		return StringSlicesEqual(x.([]string), y.([]string))
 	})
 	if StringSlicesEqual(nil, []string{"a"}) || StringSlicesEqual([]string{"a"}, nil) {
@@ -218,7 +218,7 @@ func TestSlices_Suffix(t *testing.T) {
 }
 
 func TestSlices_Int64SlicesEqual(t *testing.T) {
-	vals := []interface{}{
+	vals := []any{
 		[]int64{},
 		[]int64{0},
 		[]int64{1},
@@ -227,7 +227,7 @@ func TestSlices_Int64SlicesEqual(t *testing.T) {
 		[]int64{41, 43, 0},
 		[]int64{42, 43, 43},
 	}
-	testSlicesEquals(t, "Int64", vals, []int64{42, 43, 0}, vals[4], func(x, y interface{}) bool {
+	testSlicesEquals(t, "Int64", vals, []int64{42, 43, 0}, vals[4], func(x, y any) bool {
 		return Int64SlicesEqual(x.([]int64), y.([]int64))
 	})
 	if Int64SlicesEqual(nil, []int64{1}) || Int64SlicesEqual([]int64{1}, nil) {
@@ -239,7 +239,7 @@ func TestSlices_Int64SlicesEqual(t *testing.T) {
 }
 
 func TestSlices_UInt64SlicesEqual(t *testing.T) {
-	vals := []interface{}{
+	vals := []any{
 		[]uint64{},
 		[]uint64{0},
 		[]uint64{1},
@@ -248,7 +248,7 @@ func TestSlices_UInt64SlicesEqual(t *testing.T) {
 		[]uint64{41, 43, 0},
 		[]uint64{42, 43, 43},
 	}
-	testSlicesEquals(t, "Uint64", vals, []uint64{42, 43, 0}, vals[4], func(x, y interface{}) bool {
+	testSlicesEquals(t, "Uint64", vals, []uint64{42, 43, 0}, vals[4], func(x, y any) bool {
 		return Uint64SlicesEqual(x.([]uint64), y.([]uint64))
 	})
 	if Uint64SlicesEqual(nil, []uint64{1}) || Uint64SlicesEqual([]uint64{1}, nil) {
@@ -260,7 +260,7 @@ func TestSlices_UInt64SlicesEqual(t *testing.T) {
 }
 
 func TestSlices_BoolSlicesEqual(t *testing.T) {
-	bools := []interface{}{
+	bools := []any{
 		[]bool{},
 		[]bool{false},
 		[]bool{true},
@@ -269,7 +269,7 @@ func TestSlices_BoolSlicesEqual(t *testing.T) {
 		[]bool{true, false, true},
 		[]bool{false, false, false},
 	}
-	testSlicesEquals(t, "Bool", bools, []bool{false, false, true}, bools[4], func(x, y interface{}) bool {
+	testSlicesEquals(t, "Bool", bools, []bool{false, false, true}, bools[4], func(x, y any) bool {
 		return BoolSlicesEqual(x.([]bool), y.([]bool))
 	})
 	if BoolSlicesEqual(nil, []bool{false}) || BoolSlicesEqual([]bool{false}, nil) {
@@ -281,7 +281,7 @@ func TestSlices_BoolSlicesEqual(t *testing.T) {
 }
 
 func TestSlices_FloatSlicesEqual(t *testing.T) {
-	vals := []interface{}{
+	vals := []any{
 		[]float64{},
 		[]float64{0},
 		[]float64{1, 2},
@@ -289,7 +289,7 @@ func TestSlices_FloatSlicesEqual(t *testing.T) {
 		[]float64{2.0, 4, 5},
 		[]float64{3, 4, 4},
 	}
-	testSlicesEquals(t, "Float64", vals, []float64{2.0, 4, 5}, vals[4], func(x, y interface{}) bool {
+	testSlicesEquals(t, "Float64", vals, []float64{2.0, 4, 5}, vals[4], func(x, y any) bool {
 		return Float64SlicesEqual(x.([]float64), y.([]float64))
 	})
 	if Float64SlicesEqual(nil, []float64{0}) || Float64SlicesEqual([]float64{0}, nil) {
@@ -300,7 +300,7 @@ func TestSlices_FloatSlicesEqual(t *testing.T) {
 	}
 }
 
-func testSlicesEquals(t *testing.T, funcName string, vals []interface{}, goodVal1 interface{}, goodVal2 interface{}, equalsFunc func(x, y interface{}) bool) {
+func testSlicesEquals(t *testing.T, funcName string, vals []any, goodVal1 any, goodVal2 any, equalsFunc func(x, y any) bool) {
 	for i, x := range vals {
 		for j, y := range vals {
 			r := equalsFunc(x, y)

@@ -125,6 +125,10 @@ func DisplayName(name string) string {
 //	"MyClass" =>              ["My", "Class"]
 //	"MyC" =>                  ["My", "C"]
 //	"HTML" =>                 ["HTML"]
+//	"ID" =>                   ["ID"]
+//	"IDs" =>                  ["IDs"]
+//	"AssetID" =>              ["Asset", "ID"]
+//	"AssetIDs" =>             ["Asset", "IDs"]
 //	"PDFLoader" =>            ["PDF", "Loader"]
 //	"AString" =>              ["A", "String"]
 //	"SimpleXMLParser" =>      ["Simple", "XML", "Parser"]
@@ -182,6 +186,16 @@ func Split(src string) (entries []string) {
 	// "PDFL", "oader" -> "PDF", "Loader"
 	for i := 0; i < len(runes)-1; i++ {
 		if unicode.IsUpper(runes[i][0]) && unicode.IsLower(runes[i+1][0]) {
+			// Special case: preserve plural acronyms like "IDs", "APIs", "GUIDs"
+			// When we have ["ID", "s"], merge into ["IDs"] instead of splitting to ["I", "Ds"].
+			if len(runes[i]) >= 2 && len(runes[i+1]) == 1 && runes[i+1][0] == 's' {
+				// Merge the trailing 's' into the acronym and remove the next segment
+				runes[i] = append(runes[i], 's')
+				runes = append(runes[:i+1], runes[i+2:]...)
+				i-- // re-evaluate at this index for subsequent patterns
+				continue
+			}
+			// Default behavior: move the last uppercase letter to the beginning of the next lowercase run
 			runes[i+1] = append([]rune{runes[i][len(runes[i])-1]}, runes[i+1]...)
 			runes[i] = runes[i][:len(runes[i])-1]
 		}

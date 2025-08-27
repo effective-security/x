@@ -84,13 +84,13 @@ func GetAbsFilename(file, projFolder string) (string, error) {
 
 // Load will load the configuration from the named config file,
 // apply any overrides, and resolve relative directory locations.
-func (f *Factory) Load(configFile string, config interface{}) (absConfigFile string, err error) {
+func (f *Factory) Load(configFile string, config any) (absConfigFile string, err error) {
 	return f.LoadForHostName(configFile, "", config)
 }
 
 // LoadForHostName will load the configuration from the named config file for specified host name,
 // apply any overrides, and resolve relative directory locations.
-func (f *Factory) LoadForHostName(configFile, hostnameOverride string, config interface{}) (absConfigFile string, err error) {
+func (f *Factory) LoadForHostName(configFile, hostnameOverride string, config any) (absConfigFile string, err error) {
 	logger.KV(xlog.TRACE, "cfg", configFile, "hostname", hostnameOverride)
 
 	configFile, baseDir, err := f.ResolveConfigFile(configFile)
@@ -145,7 +145,7 @@ type Hostmap struct {
 //  1. the hostnameOverride parameter if not ""
 //  2. the value of the Environment variable in envKeyName, if not ""
 //  3. the OS supplied hostname
-func (f *Factory) load(configFilename, hostnameOverride, baseDir string, config interface{}) error {
+func (f *Factory) load(configFilename, hostnameOverride, baseDir string, config any) error {
 	var err error
 	ops := []yamlcfg.YAMLOption{yamlcfg.File(configFilename)}
 
