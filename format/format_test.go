@@ -79,6 +79,7 @@ func Test_DisplayName(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "Test", format.DisplayName("Test"))
 	assert.Equal(t, "test", format.DisplayName("test"))
+	assert.Equal(t, "Test Value", format.DisplayName("test_value"))
 	assert.Equal(t, "Test Data", format.DisplayName("TestData"))
 	assert.Equal(t, "AWS Name", format.DisplayName("AWSName"))
 	assert.Equal(t, "S3 Location", format.DisplayName("S3Location"))

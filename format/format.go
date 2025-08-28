@@ -106,6 +106,38 @@ func StringsAndMore(first int, val []string) string {
 
 // DisplayName returns display name of a field to preserve common acronyms
 func DisplayName(name string) string {
+	// Handle snake_case by splitting on underscore and title-casing segments that start lowercase
+	if strings.Contains(name, "_") {
+		parts := strings.Split(name, "_")
+		words := make([]string, 0, len(parts))
+		for _, p := range parts {
+			if p == "" {
+				continue
+			}
+			// Use existing logic for acronyms and camel segments
+			w := DisplayName(p)
+			// Title-case words that start with a lowercase letter
+			var b strings.Builder
+			prevSpace := true
+			for _, r := range w {
+				if unicode.IsSpace(r) {
+					prevSpace = true
+					b.WriteRune(r)
+					continue
+				}
+				if prevSpace && unicode.IsLower(r) {
+					b.WriteRune(unicode.ToUpper(r))
+					prevSpace = false
+					continue
+				}
+				b.WriteRune(r)
+				prevSpace = false
+			}
+			words = append(words, b.String())
+		}
+		return strings.Join(words, " ")
+	}
+
 	s := Split(name)
 	if len(s) == 0 {
 		return name
@@ -121,6 +153,7 @@ func DisplayName(name string) string {
 //
 //	"" =>                     [""]
 //	"lowercase" =>            ["lowercase"]
+//	"test_value" =>           ["Test", "Value"]
 //	"Class" =>                ["Class"]
 //	"MyClass" =>              ["My", "Class"]
 //	"MyC" =>                  ["My", "C"]
