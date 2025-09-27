@@ -1,7 +1,9 @@
 package fileutil
 
 import (
+	"io/fs"
 	"os"
+	"path/filepath"
 
 	"github.com/cockroachdb/errors"
 )
@@ -84,4 +86,24 @@ func FileNames(folder string) ([]string, error) {
 	}
 
 	return list, nil
+}
+
+// EnsureFolderExistsForFile ensures a directory exists from the given file path.
+func EnsureFolderExistsForFile(path string, mod os.FileMode) error {
+	return EnsureFolderExists(filepath.Dir(path), mod)
+}
+
+// EnsureFolderExists ensures a directory exists from the given folder path.
+func EnsureFolderExists(path string, mod os.FileMode) error {
+	err := FolderExists(path)
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		if err = os.MkdirAll(path, mod); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
