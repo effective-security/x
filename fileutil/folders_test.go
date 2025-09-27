@@ -61,3 +61,15 @@ func TestSubfolderNamesAndFileNames(t *testing.T) {
 	_, err = FileNames("not found")
 	assert.EqualError(t, err, "open not found: no such file or directory")
 }
+
+func TestEnsureFolderExists(t *testing.T) {
+	tmp := t.TempDir()
+	dir := filepath.Join(tmp, "dir")
+	err := EnsureFolderExists(dir, 0755)
+	require.NoError(t, err, "EnsureFolderExists error")
+	assert.DirExists(t, dir)
+
+	file := filepath.Join(dir, "file.txt")
+	err = EnsureFolderExistsForFile(file, 0755)
+	require.NoError(t, err, "EnsureFolderExistsForFile error")
+}
