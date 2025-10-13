@@ -18,6 +18,12 @@ type Names interface {
 	NamesMap() map[int32]string
 }
 
+// DisplayNames interface for enum with display names
+type DisplayNames interface {
+	Names
+	DisplayNamesMap() map[int32]string
+}
+
 // Values interface for enum with values
 type Values interface {
 	Enum
@@ -68,6 +74,38 @@ func Parse[E Values](val string) E {
 		res |= E(values[name])
 	}
 	return res
+}
+
+func SliceNames[E Names](vals []E) []string {
+	if len(vals) == 0 {
+		return []string{}
+	}
+	names := make([]string, len(vals))
+	nm := vals[0].NamesMap()
+	for i, val := range vals {
+		names[i] = nm[int32(val)]
+	}
+	return names
+}
+
+func SliceNamesString[E Names](vals []E) string {
+	return strings.Join(SliceNames(vals), nameSeparator)
+}
+
+func SliceDisplayNames[E DisplayNames](vals []E) []string {
+	if len(vals) == 0 {
+		return []string{}
+	}
+	names := make([]string, len(vals))
+	nm := vals[0].DisplayNamesMap()
+	for i, val := range vals {
+		names[i] = nm[int32(val)]
+	}
+	return names
+}
+
+func SliceDisplayNamesString[E DisplayNames](vals []E) string {
+	return strings.Join(SliceDisplayNames(vals), nameSeparator)
 }
 
 // FlagNames returns list of enum value names from flag value
