@@ -31,6 +31,15 @@ var (
 		16:         "Critical",
 		0x7fffffff: "All",
 	}
+	Severity_Enum_displayName = map[int32]string{
+		0:          "INVALID",
+		1:          "UNKNOWN",
+		2:          "LOW",
+		4:          "MEDIUM",
+		8:          "HIGH",
+		16:         "CRITICAL",
+		0x7fffffff: "ALL",
+	}
 	Severity_Enum_value = map[string]int32{
 		"Invalid":  0,
 		"Unknown":  1,
@@ -48,6 +57,10 @@ func (s Severity_Enum) ValuesMap() map[string]int32 {
 func (s Severity_Enum) NamesMap() map[int32]string {
 	return Severity_Enum_name
 }
+func (s Severity_Enum) DisplayNamesMap() map[int32]string {
+	return Severity_Enum_displayName
+}
+
 func (s Severity_Enum) SupportedNames() string {
 	return enum.SupportedNames[Severity_Enum]()
 }
@@ -83,4 +96,15 @@ func Test_SupportedNames(t *testing.T) {
 	assert.Equal(t, []string{"Unknown", "Low", "Medium", "High", "Critical"}, e.ValueNames())
 	assert.Equal(t, []Severity_Enum{Severity_Unknown, Severity_Low, Severity_Medium, Severity_High, Severity_Critical}, e.Flags())
 	assert.Equal(t, []int32{1, 2, 4, 8, 16}, e.FlagsInt())
+}
+
+func Test_SliceDisplayNames(t *testing.T) {
+	assert.Equal(t, []string{"INVALID", "UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL", "ALL"}, enum.SliceDisplayNames([]Severity_Enum{Severity_Invalid, Severity_Unknown, Severity_Low, Severity_Medium, Severity_High, Severity_Critical, Severity_All}))
+	assert.Equal(t, []string{"Invalid", "Unknown", "Low", "Medium", "High", "Critical", "All"}, enum.SliceNames([]Severity_Enum{Severity_Invalid, Severity_Unknown, Severity_Low, Severity_Medium, Severity_High, Severity_Critical, Severity_All}))
+	assert.Equal(t, "LOW,MEDIUM", enum.SliceDisplayNamesString([]Severity_Enum{Severity_Low, Severity_Medium}))
+	assert.Equal(t, "Low,Medium", enum.SliceNamesString([]Severity_Enum{Severity_Low, Severity_Medium}))
+	assert.Equal(t, "LOW", enum.SliceDisplayNamesString([]Severity_Enum{Severity_Low}))
+	assert.Equal(t, "Low", enum.SliceNamesString([]Severity_Enum{Severity_Low}))
+	assert.Equal(t, "", enum.SliceDisplayNamesString([]Severity_Enum{}))
+	assert.Equal(t, "", enum.SliceNamesString([]Severity_Enum{}))
 }
