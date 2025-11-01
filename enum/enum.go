@@ -15,18 +15,21 @@ type Enum interface {
 // Names interface for enum with names
 type Names interface {
 	Enum
+	// NamesMap returns a map of enum values to their names
 	NamesMap() map[int32]string
 }
 
 // DisplayNames interface for enum with display names
 type DisplayNames interface {
 	Names
+	// DisplayNamesMap returns a map of enum values to their display names
 	DisplayNamesMap() map[int32]string
 }
 
 // Values interface for enum with values
 type Values interface {
 	Enum
+	// ValuesMap returns a map of enum names to their values
 	ValuesMap() map[string]int32
 }
 
@@ -46,8 +49,9 @@ func NamesHelpString(vals map[string]int32) string {
 	return strings.Join(typs, nameSeparator)
 }
 
-// Convert returns enum value from names
-func Convert[E Values](names []string) E {
+// Convert returns enum value from names.
+// If multiple names are provided, the enum value is the bitwise OR of the values.
+func Convert[E Values](names ...string) E {
 	var res E
 	values := res.ValuesMap()
 	for _, name := range names {

@@ -83,7 +83,7 @@ func Test_SupportedNames(t *testing.T) {
 	assert.Equal(t, Severity_Critical|Severity_High, enum.Parse[Severity_Enum]("Critical|High"))
 	assert.Equal(t, Severity_Critical, enum.Parse[Severity_Enum]("Critical"))
 	assert.Equal(t, Severity_Critical|Severity_High, enum.Parse[Severity_Enum]("Critical,High"))
-	assert.Equal(t, Severity_Critical|Severity_High, enum.Convert[Severity_Enum]([]string{"Critical", "High"}))
+	assert.Equal(t, Severity_Critical|Severity_High, enum.Convert[Severity_Enum]("Critical", "High"))
 
 	e := Severity_Critical | Severity_High
 	assert.Equal(t, "High,Critical", e.ValueString())
