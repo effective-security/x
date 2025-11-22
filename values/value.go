@@ -6,12 +6,42 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/effective-security/x/enum"
 	"github.com/effective-security/xlog"
 )
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/x", "values")
+
+type HasDisplayName interface {
+	DisplayName() string
+}
+
+type HasDisplayNames interface {
+	DisplayNames() []string
+}
+
+type HasName interface {
+	Name() string
+}
+
+type HasNames interface {
+	Names() []string
+}
+
+type HasValuesMap interface {
+	ValuesMap() map[string]int32
+}
+
+type HasNamesMap interface {
+	NamesMap() map[int32]string
+}
+
+type HasDisplayNamesMap interface {
+	DisplayNamesMap() map[int32]string
+}
 
 // String returns string value
 func String(v any) string {
@@ -22,15 +52,13 @@ func String(v any) string {
 	case string:
 		return tv
 	case []string:
-		if len(tv) > 0 {
-			return tv[0]
-		}
-		return ""
+		return strings.Join(tv, ",")
 	case []any:
-		if len(tv) > 0 {
-			return String(v.([]any)[0])
+		list := make([]string, len(tv))
+		for i, v := range tv {
+			list[i] = String(v)
 		}
-		return ""
+		return strings.Join(list, ",")
 	case int:
 		return strconv.Itoa(tv)
 	case int16:
@@ -46,12 +74,30 @@ func String(v any) string {
 	case uint64:
 		return strconv.FormatUint(uint64(tv), 10)
 	case float32:
-		return strconv.FormatUint(uint64(tv), 10)
+		return strconv.FormatFloat(float64(tv), 'f', -1, 32)
 	case float64:
-		return strconv.FormatUint(uint64(tv), 10)
+		return strconv.FormatFloat(tv, 'f', -1, 64)
 	case bool:
 		return Select(tv, "true", "false")
+	case HasDisplayName:
+		return tv.DisplayName()
+	case HasName:
+		return tv.Name()
+	case fmt.Stringer:
+		return tv.String()
 	default:
+		kind := reflect.TypeOf(v).Kind()
+		if kind == reflect.Slice {
+			v := reflect.ValueOf(v)
+			if v.Kind() == reflect.Ptr {
+				v = v.Elem()
+			}
+			list := make([]string, v.Len())
+			for i := 0; i < v.Len(); i++ {
+				list[i] = String(v.Index(i).Interface())
+			}
+			return strings.Join(list, ",")
+		}
 		logger.KV(xlog.DEBUG, "reason", "unsupported", "type", fmt.Sprintf("%T", v))
 		return xlog.EscapedString(v)
 	}
@@ -64,6 +110,8 @@ func StringSlice(v any) []string {
 	}
 
 	switch tv := v.(type) {
+	case string:
+		return strings.Split(tv, ",")
 	case []string:
 		return tv
 	case []any:
@@ -75,6 +123,90 @@ func StringSlice(v any) []string {
 	default:
 		logger.KV(xlog.DEBUG, "reason", "unsupported", "type", reflect.TypeOf(v))
 		return []string{}
+	}
+}
+
+// IntSlice returns slice of int values
+func IntSlice(v any) []int {
+	if v == nil {
+		return []int{}
+	}
+
+	switch tv := v.(type) {
+	case []int:
+		return tv
+	case []int32:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = int(v)
+		}
+		return list
+	case []int64:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = int(v)
+		}
+		return list
+	case []uint:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = int(v)
+		}
+		return list
+	case []uint32:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = int(v)
+		}
+		return list
+	case []uint64:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = int(v)
+		}
+		return list
+	case []float32:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = int(v)
+		}
+		return list
+	case []float64:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = int(v)
+		}
+		return list
+	case string:
+		return IntSlice(strings.Split(tv, ","))
+	case []string:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = Int(v)
+		}
+		return list
+	case []any:
+		list := make([]int, len(tv))
+		for i, v := range tv {
+			list[i] = Int(v)
+		}
+		return list
+	default:
+		kind := reflect.TypeOf(v).Kind()
+		if kind == reflect.Slice {
+			v := reflect.ValueOf(v)
+			if v.Kind() == reflect.Ptr {
+				v = v.Elem()
+			}
+			list := make([]int, v.Len())
+			for i := 0; i < v.Len(); i++ {
+				list[i] = Int(v.Index(i).Interface())
+			}
+			return list
+		}
+
+		logger.KV(xlog.DEBUG, "reason", "unsupported", "type", reflect.TypeOf(v))
+		return []int{}
 	}
 }
 
@@ -183,6 +315,8 @@ func Int(v any) int {
 			return 0
 		}
 		return i
+	case enum.ProtoEnum:
+		return int(tv.Number())
 	default:
 		logger.KV(xlog.DEBUG, "reason", "unsupported", "val", v, "type", fmt.Sprintf("%T", v))
 		return 0
