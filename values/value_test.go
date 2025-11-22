@@ -2,13 +2,17 @@ package values
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/effective-security/x/enum"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 func TestValues(t *testing.T) {
@@ -106,10 +110,100 @@ type testStruct struct {
 	AUD []string `json:"aud"`
 }
 
+type enumLike int32
+
+const (
+	enumLike_Invalid enumLike = 0
+	enumLike_Unknown enumLike = 1
+	enumLike_Low     enumLike = 2
+	enumLike_Medium  enumLike = 4
+)
+
+func (e enumLike) ValuesMap() map[string]int32 {
+	return map[string]int32{
+		"Invalid": int32(enumLike_Invalid),
+		"Unknown": int32(enumLike_Unknown),
+		"Low":     int32(enumLike_Low),
+		"Medium":  int32(enumLike_Medium),
+	}
+}
+
+func (e enumLike) NamesMap() map[int32]string {
+	return map[int32]string{
+		int32(enumLike_Invalid): "Invalid",
+		int32(enumLike_Unknown): "Unknown",
+		int32(enumLike_Low):     "Low",
+		int32(enumLike_Medium):  "Medium",
+	}
+}
+
+func (e enumLike) DisplayNamesMap() map[int32]string {
+	return map[int32]string{
+		int32(enumLike_Invalid): "INVALID",
+		int32(enumLike_Unknown): "UNKNOWN",
+		int32(enumLike_Low):     "LOW",
+		int32(enumLike_Medium):  "MEDIUM",
+	}
+}
+
+func (s enumLike) String() string {
+	return s.NamesMap()[int32(s)]
+}
+
+func (s enumLike) Descriptor() protoreflect.EnumDescriptor {
+	return nil
+}
+
+func (s enumLike) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(s)
+}
+
+var _ = enum.ProtoEnum(enumLike_Low)
+
+type withName int32
+
+func (s withName) Name() string {
+	return fmt.Sprintf("name(%d)", s)
+}
+
+// DisplayNames returns display names of Enum bitflag value
+func (s enumLike) DisplayNames() []string {
+	flags := enum.Flags(s)
+	count := len(flags)
+	if count == 0 {
+		return []string{s.String()}
+	}
+	if count == 1 {
+		return []string{s.DisplayNamesMap()[int32(flags[0])]}
+	}
+	var names []string
+	for _, flag := range flags {
+		names = append(names, s.DisplayNamesMap()[int32(flag)])
+	}
+	return names
+}
+
+// DisplayName returns display name of Enum value
+func (s enumLike) DisplayName() string {
+	flags := enum.Flags(s)
+	count := len(flags)
+	if count == 0 {
+		return s.String()
+	}
+	if count == 1 {
+		return s.DisplayNamesMap()[int32(flags[0])]
+	}
+	var names []string
+	for _, flag := range flags {
+		names = append(names, s.DisplayNamesMap()[int32(flag)])
+	}
+	return strings.Join(names, ",")
+}
+
 func TestValues_String(t *testing.T) {
 	c := func(o MapAny, k, exp string) {
 		act := o.String(k)
-		assert.Equal(t, act, exp)
+		assert.Equal(t, exp, act)
 	}
 
 	stru := struct {
@@ -122,7 +216,7 @@ func TestValues_String(t *testing.T) {
 		"foo":        "bar",
 		"blank":      "",
 		"count":      uint64(1),
-		"strings":    []string{"strings"},
+		"strings":    []string{"string1", "string2"},
 		"empty":      []string{},
 		"interfaces": []any{"interfaces"},
 		"einterface": []any{},
@@ -134,16 +228,20 @@ func TestValues_String(t *testing.T) {
 		"uint":       uint(123),
 		"uint32":     uint32(132),
 		"uint64":     uint64(164),
-		"float32":    float32(1.1),
-		"float64":    float64(2.64),
+		"float32":    float32(1.234),
+		"float64":    float64(2.345),
 		"bool_true":  true,
 		"bool_false": false,
+		"enum":       enumLike_Low,
+		"enums":      []enumLike{enumLike_Low, enumLike_Medium},
+		"bitmask":    enumLike(enumLike_Low | enumLike_Medium),
+		"withName":   withName(1),
 	}
 	c(o, "foo", "bar")
 	c(o, "blank", "")
 	c(o, "unknown", "")
 	c(o, "count", "1")
-	c(o, "strings", "strings")
+	c(o, "strings", "string1,string2")
 	c(o, "empty", "")
 	c(o, "interfaces", "interfaces")
 	c(o, "einterface", "")
@@ -154,10 +252,14 @@ func TestValues_String(t *testing.T) {
 	c(o, "uint", "123")
 	c(o, "uint32", "132")
 	c(o, "uint64", "164")
-	c(o, "float32", "1")
-	c(o, "float64", "2")
+	c(o, "float32", "1.234")
+	c(o, "float64", "2.345")
 	c(o, "bool_true", "true")
 	c(o, "bool_false", "false")
+	c(o, "enum", "LOW")
+	c(o, "enums", "LOW,MEDIUM")
+	c(o, "bitmask", "LOW,MEDIUM")
+	c(o, "withName", "name(1)")
 }
 
 func TestValues_JSON(t *testing.T) {
@@ -515,6 +617,59 @@ func TestValues_StringSlice(t *testing.T) {
 
 	r = StringSlice([]int{1, 2, 3})
 	assert.Equal(t, []string{}, r)
+
+	r = StringSlice("1,2,3")
+	assert.Equal(t, []string{"1", "2", "3"}, r)
+}
+
+func TestValues_IntSlice(t *testing.T) {
+	r := IntSlice(nil)
+	assert.Equal(t, []int{}, r)
+
+	r = IntSlice([]int{1, 2, 3})
+	assert.Len(t, r, 3)
+	assert.Equal(t, []int{1, 2, 3}, r)
+
+	r = IntSlice([]any{1, "2", 5})
+	assert.Len(t, r, 3)
+	assert.Equal(t, []int{1, 2, 5}, r)
+
+	r = IntSlice([]any{"1", "2", "3"})
+	assert.Len(t, r, 3)
+	assert.Equal(t, []int{1, 2, 3}, r)
+
+	r = IntSlice([]enumLike{enumLike_Low, enumLike_Medium})
+	assert.Equal(t, []int{2, 4}, r)
+
+	r = IntSlice([]enum.ProtoEnum{enumLike_Low, enumLike_Medium})
+	assert.Equal(t, []int{2, 4}, r)
+
+	r = IntSlice([]int32{1, 2})
+	assert.Equal(t, []int{1, 2}, r)
+
+	r = IntSlice([]int64{1, 2})
+	assert.Equal(t, []int{1, 2}, r)
+
+	r = IntSlice([]uint{1, 2})
+	assert.Equal(t, []int{1, 2}, r)
+
+	r = IntSlice([]uint32{1, 2})
+	assert.Equal(t, []int{1, 2}, r)
+
+	r = IntSlice([]uint64{1, 2})
+	assert.Equal(t, []int{1, 2}, r)
+
+	r = IntSlice([]float32{1, 2})
+	assert.Equal(t, []int{1, 2}, r)
+
+	r = IntSlice([]float64{1, 2})
+	assert.Equal(t, []int{1, 2}, r)
+
+	r = IntSlice("1,2")
+	assert.Equal(t, []int{1, 2}, r)
+
+	r = IntSlice([]string{"1", "2"})
+	assert.Equal(t, []int{1, 2}, r)
 }
 
 func Test_NvlInt(t *testing.T) {

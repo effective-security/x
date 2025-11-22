@@ -3,13 +3,21 @@ package enum
 import (
 	"sort"
 	"strings"
+
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 const nameSeparator = ","
 
+type ProtoEnum interface {
+	String() string
+	Descriptor() protoreflect.EnumDescriptor
+	Number() protoreflect.EnumNumber
+}
+
 // Enum interface for generic enum
 type Enum interface {
-	~int32 | ~uint32
+	~int32
 }
 
 // Names interface for enum with names

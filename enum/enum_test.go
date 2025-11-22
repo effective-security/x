@@ -6,6 +6,7 @@ import (
 
 	"github.com/effective-security/x/enum"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 type Severity_Enum int32
@@ -60,6 +61,12 @@ func (s Severity_Enum) NamesMap() map[int32]string {
 func (s Severity_Enum) DisplayNamesMap() map[int32]string {
 	return Severity_Enum_displayName
 }
+func (s Severity_Enum) Descriptor() protoreflect.EnumDescriptor {
+	return nil
+}
+func (s Severity_Enum) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(s)
+}
 
 func (s Severity_Enum) SupportedNames() string {
 	return enum.SupportedNames[Severity_Enum]()
@@ -75,6 +82,9 @@ func (s Severity_Enum) Flags() []Severity_Enum {
 }
 func (s Severity_Enum) FlagsInt() []int32 {
 	return enum.FlagsInt(s)
+}
+func (s Severity_Enum) String() string {
+	return Severity_Enum_name[int32(s)]
 }
 
 func Test_SupportedNames(t *testing.T) {
