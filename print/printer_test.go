@@ -3,6 +3,7 @@ package print_test
 import (
 	"bytes"
 	"io"
+	"reflect"
 	"testing"
 
 	"github.com/effective-security/x/print"
@@ -131,6 +132,11 @@ func TestRegisterType(t *testing.T) {
 	print.RegisterType(([]*testStruct)(nil), func(w io.Writer, value any) {
 		print.Yaml(w, value)
 	})
+
+	_, found := print.FindRegisteredType(reflect.TypeOf(([]*testStruct)(nil)))
+	assert.True(t, found)
+	_, found = print.FindRegistered(obj)
+	assert.True(t, found)
 
 	buf.Reset()
 	print.Print(&buf, obj)

@@ -16,19 +16,39 @@ import (
 )
 
 var (
-	printRegistry = make(map[reflect.Type]func(io.Writer, any))
+	printRegistry = make(map[reflect.Type]CustomFn)
 	registryMutex sync.RWMutex
 )
+
+// CustomFn is a custom print function for a specific type.
+// It takes precedence over the default print functions.
+type CustomFn func(io.Writer, any)
 
 type Printer interface {
 	Print(w io.Writer)
 }
 
 // RegisterType allows registering a custom print function for a specific type.
-func RegisterType(typ any, printFunc func(io.Writer, any)) {
+func RegisterType(typ any, printFunc CustomFn) {
 	registryMutex.Lock()
 	defer registryMutex.Unlock()
 	printRegistry[reflect.TypeOf(typ)] = printFunc
+}
+
+// FindRegistered finds a custom print function for a specific value.
+func FindRegistered(val any) (CustomFn, bool) {
+	registryMutex.RLock()
+	defer registryMutex.RUnlock()
+	res, ok := printRegistry[reflect.TypeOf(val)]
+	return res, ok
+}
+
+// FindRegisteredType finds a custom print function for a specific type.
+func FindRegisteredType(typ reflect.Type) (CustomFn, bool) {
+	registryMutex.RLock()
+	defer registryMutex.RUnlock()
+	res, ok := printRegistry[typ]
+	return res, ok
 }
 
 // JSON prints value to out
@@ -50,7 +70,7 @@ func Object(w io.Writer, format string, value any) {
 		Yaml(w, value)
 	} else if format == "json" {
 		JSON(w, value)
-	} else if printFunc, found := printRegistry[reflect.TypeOf(value)]; found {
+	} else if printFunc, found := FindRegistered(value); found {
 		printFunc(w, value)
 	} else if pr, ok := value.(Printer); ok {
 		pr.Print(w)
@@ -65,13 +85,13 @@ func Print(w io.Writer, value any) {
 	registryMutex.RLock()
 	defer registryMutex.RUnlock()
 
-	if pr, ok := value.(Printer); ok {
-		pr.Print(w)
+	if printFunc, found := FindRegistered(value); found {
+		printFunc(w, value)
 		return
 	}
 
-	if printFunc, found := printRegistry[reflect.TypeOf(value)]; found {
-		printFunc(w, value)
+	if pr, ok := value.(Printer); ok {
+		pr.Print(w)
 		return
 	}
 
