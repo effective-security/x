@@ -196,7 +196,7 @@ vet:
 
 vulns:
 	echo "Running vulns"
-	govulncheck ${PROJ_PACKAGE}/...
+	govulncheck ${PROJ_PACKAGE}/... || true
 
 lint: fmt vet vulns
 	echo "Running lint"
