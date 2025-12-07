@@ -424,3 +424,13 @@ func Test_Deduplicate(t *testing.T) {
 	assert.Equal(t, []int{1}, Deduplicate([]int{1}))
 	assert.Equal(t, []int{1, 2, 3}, Deduplicate([]int{1, 2, 2, 3, 1, 1}))
 }
+
+func Test_StringsSafeSplit(t *testing.T) {
+	assert.Equal(t, []string{}, StringsSafeSplit("", ""))
+	assert.Equal(t, []string{}, StringsSafeSplit("  ", ""))
+	assert.Equal(t, []string{"a"}, StringsSafeSplit("a", ""))
+	assert.Equal(t, []string{"a"}, StringsSafeSplit("a", " "))
+	assert.Equal(t, []string{"a"}, StringsSafeSplit("a", " , "))
+	assert.Equal(t, []string{"a", "b"}, StringsSafeSplit("a, b", ", "))
+	assert.Equal(t, []string{"a", "b", "c"}, StringsSafeSplit("a, b ,,,, c   ", ","))
+}
