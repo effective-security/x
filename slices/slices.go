@@ -286,3 +286,15 @@ func HashStrings(values ...string) string {
 	}
 	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }
+
+// StringsSafeSplit splits a string into a slice of strings, removing whitespaces and empty strings.
+func StringsSafeSplit(s, sep string) []string {
+	list := strings.Split(s, sep)
+	res := make([]string, 0, len(list))
+	for _, v := range list {
+		if vs := strings.TrimSpace(v); vs != "" {
+			res = append(res, vs)
+		}
+	}
+	return res
+}
