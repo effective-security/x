@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
+	"reflect"
 	"sort"
 	"time"
 
@@ -15,6 +17,38 @@ import (
 
 // MapAny provides map of values
 type MapAny map[string]any
+
+func FromStruct(value any) MapAny {
+	if value == nil {
+		return nil
+	}
+
+	v := reflect.ValueOf(value)
+	// Handle pointers
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+
+	if v.Kind() != reflect.Struct {
+		panic(fmt.Sprintf("expected struct, got %s", v.Kind()))
+	}
+
+	typ := v.Type()
+
+	res := make(MapAny, v.NumField())
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		// Skip unexported struct fields that cannot be interfaced to avoid panics.
+		if !field.CanInterface() {
+			continue
+		}
+		res[typ.Field(i).Name] = field.Interface()
+	}
+	return res
+}
 
 // FromJSON returns map from json encoded string,
 // this method does not return value on error, as the value is expected a valid JSON string.
@@ -199,6 +233,24 @@ func (c MapAny) GetOrSet(key string, getter func(key string) any) any {
 	v := getter(key)
 	c[key] = v
 	return v
+}
+
+// Shrink shrinks the map by removing empty keys
+func (c MapAny) Shrink() MapAny {
+	if c == nil {
+		return nil
+	}
+	res := make(MapAny, len(c))
+	for k, v := range c {
+		sv := Shrink(v)
+		if sv != nil {
+			res[k] = sv
+		}
+	}
+	if len(res) == 0 {
+		return nil
+	}
+	return res
 }
 
 // Extract extracts value from nested map using path of keys
