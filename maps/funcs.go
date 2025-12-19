@@ -102,10 +102,10 @@ func Merge[K comparable, V any](maps ...map[K]V) map[K]V {
 }
 
 // Invert swaps keys and values (values must be comparable)
-func Invert[K comparable, V comparable](m map[K]V) map[V]K {
-	result := make(map[V]K, len(m))
+func Invert[K comparable, V comparable](m map[K]V) map[V][]K {
+	result := make(map[V][]K, len(m))
 	for k, v := range m {
-		result[v] = k
+		result[v] = append(result[v], k)
 	}
 	return result
 }

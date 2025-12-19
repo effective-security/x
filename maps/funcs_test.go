@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/effective-security/x/maps"
 )
@@ -226,19 +227,14 @@ func TestMerge(t *testing.T) {
 }
 
 func TestInvert(t *testing.T) {
-	input := map[string]int{"a": 1, "b": 2, "c": 3}
+	input := map[string]int{"a": 1, "b": 2, "c": 3, "d": 1, "e": 2}
 
 	result := maps.Invert(input)
-	expected := map[int]string{1: "a", 2: "b", 3: "c"}
-	assert.Equal(t, expected, result)
-
-	// Test with duplicate values (should overwrite)
-	input2 := map[string]int{"a": 1, "b": 1, "c": 2}
-	result2 := maps.Invert(input2)
-	// Only one key-value pair should remain for value 1
-	assert.Equal(t, 2, len(result2))
-	assert.Contains(t, result2, 1)
-	assert.Contains(t, result2, 2)
+	expected := map[int][]string{1: {"a", "d"}, 2: {"b", "e"}, 3: {"c"}}
+	require.Equal(t, len(expected), len(result))
+	for k, v := range expected {
+		assert.ElementsMatch(t, v, result[k])
+	}
 }
 
 func TestGroupBy(t *testing.T) {

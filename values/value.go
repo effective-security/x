@@ -544,3 +544,117 @@ func IndentJSON(data string) string {
 	}
 	return data
 }
+
+// IsEmpty checks if a value is considered empty
+func IsEmpty(value any) bool {
+	if value == nil {
+		return true
+	}
+
+	v := reflect.ValueOf(value)
+	if v.IsZero() {
+		return true
+	}
+	switch v.Kind() {
+	case reflect.Slice, reflect.Array:
+		return v.Len() == 0
+	case reflect.Map:
+		return v.Len() == 0
+	case reflect.Ptr:
+		if v.IsNil() {
+			return true
+		}
+		return IsEmpty(v.Elem().Interface())
+	case reflect.Interface:
+		elem := v.Elem()
+		if !elem.IsValid() {
+			return true
+		}
+		return IsEmpty(elem.Interface())
+	default:
+		// For other types (structs, channels, etc.), consider them non-empty
+		return false
+	}
+}
+
+// Shrink removes empty values recursively:
+// - returns nil if value is empty
+// - if it's a Map, then only non empty values are returned in a map, or nil
+// - if it's a Slice, then only non empty values are returned.
+func Shrink(value any) any {
+	if IsEmpty(value) {
+		return nil
+	}
+
+	v := reflect.ValueOf(value)
+
+	// Handle pointers
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		return Shrink(v.Elem().Interface())
+	}
+
+	switch v.Kind() {
+	case reflect.Map:
+		// Handle map[string]any specifically for MapAny compatibility
+		if mapVal, ok := value.(map[string]any); ok {
+			shrunk := MapAny(mapVal).Shrink()
+			if shrunk == nil {
+				return nil
+			}
+			// Convert back to map[string]any to maintain type consistency
+			return map[string]any(shrunk)
+		}
+
+		// Handle MapAny type directly
+		if mapAny, ok := value.(MapAny); ok {
+			shrunk := mapAny.Shrink()
+			if shrunk == nil {
+				return nil
+			}
+			// Convert back to map[string]any to maintain type consistency
+			return map[string]any(shrunk)
+		}
+
+		// Handle other map types generically
+		newMap := reflect.MakeMap(v.Type())
+		for _, key := range v.MapKeys() {
+			val := v.MapIndex(key)
+			if !val.IsValid() {
+				continue
+			}
+			shrunkVal := Shrink(val.Interface())
+			if shrunkVal != nil {
+				newMap.SetMapIndex(key, reflect.ValueOf(shrunkVal))
+			}
+		}
+		if newMap.Len() == 0 {
+			return nil
+		}
+		return newMap.Interface()
+
+	case reflect.Slice, reflect.Array:
+		var newSlice []any
+		for i := 0; i < v.Len(); i++ {
+			elem := v.Index(i)
+			if !elem.IsValid() {
+				continue
+			}
+			shrunkElem := Shrink(elem.Interface())
+			if shrunkElem != nil {
+				newSlice = append(newSlice, shrunkElem)
+			}
+		}
+		if len(newSlice) == 0 {
+			return nil
+		}
+		return newSlice
+
+	default:
+		// For primitive types and other non-collection types,
+		// return the value as-is if it's not empty
+		return value
+	}
+}
