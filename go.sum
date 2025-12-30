@@ -25,6 +25,8 @@ github.com/deckarep/golang-set v1.8.0 h1:sk9/l/KqpunDwP7pSjUg0keiOOLEnOBHzykLrsP
 github.com/deckarep/golang-set v1.8.0/go.mod h1:5nI87KwE7wgsBU1F4GKAw2Qod7p5kyS383rP6+o6qqo=
 github.com/effective-security/xlog v0.10.48 h1:ZDeRcnaqhtS5ecDmIjcH9HswLi9r2/d/qaRuFUxyInc=
 github.com/effective-security/xlog v0.10.48/go.mod h1:ybNSj1ADAPkc7NEIS6RshOMCtB/y2CIRGEGCMqk0tMk=
+github.com/effective-security/xlog v0.10.49 h1:Aao/M9gdSKhB4QG3n8hGM0zlx9XM3xLpgaCJUcJLQ2A=
+github.com/effective-security/xlog v0.10.49/go.mod h1:8gXJBE7QsvntwnT4tP9ENnOAMGoUUYol7d+dqGNRP30=
 github.com/fatih/color v1.18.0 h1:S8gINlzdQ840/4pfAwic/ZE0djQEH3wM94VfqLTZcOM=
 github.com/fatih/color v1.18.0/go.mod h1:4FelSpRwEGDpQ12mAdzqdOukCy4u8WUtOY6lkT/6HfU=
 github.com/getsentry/sentry-go v0.40.0 h1:VTJMN9zbTvqDqPwheRVLcp0qcUcM+8eFivvGocAaSbo=

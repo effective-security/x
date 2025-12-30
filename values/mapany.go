@@ -361,6 +361,14 @@ func (c MapAny) Value() (driver.Value, error) {
 	return string(value), nil
 }
 
+func (c MapAny) CanonicalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	if err := writeCanonical(&buf, c); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 // OrderedMapKeys returns ordered keys
 func OrderedMapKeys[K constraints.Ordered, V any](m map[K]V) []K {
 	r := make([]K, 0, len(m))
