@@ -8,6 +8,14 @@ import (
 	"github.com/cockroachdb/errors"
 )
 
+func MarshalCanonicalJSON(v any) ([]byte, error) {
+	var buf bytes.Buffer
+	if err := WriteCanonicalJSON(&buf, v); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 // Canonicalize returns the canonical JSON representation of the input
 func CanonicalizeJSON(input []byte) ([]byte, error) {
 	dec := json.NewDecoder(bytes.NewReader(input))
@@ -19,13 +27,13 @@ func CanonicalizeJSON(input []byte) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
-	if err := writeCanonical(&buf, v); err != nil {
+	if err := WriteCanonicalJSON(&buf, v); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
 }
 
-func writeCanonical(buf *bytes.Buffer, v any) error {
+func WriteCanonicalJSON(buf *bytes.Buffer, v any) error {
 	switch x := v.(type) {
 	case map[string]any:
 		keys := make([]string, 0, len(x))
@@ -45,7 +53,7 @@ func writeCanonical(buf *bytes.Buffer, v any) error {
 			buf.WriteByte(':')
 
 			// value
-			if err := writeCanonical(buf, x[k]); err != nil {
+			if err := WriteCanonicalJSON(buf, x[k]); err != nil {
 				return err
 			}
 		}
@@ -58,7 +66,7 @@ func writeCanonical(buf *bytes.Buffer, v any) error {
 			if i > 0 {
 				buf.WriteByte(',')
 			}
-			if err := writeCanonical(buf, x[i]); err != nil {
+			if err := WriteCanonicalJSON(buf, x[i]); err != nil {
 				return err
 			}
 		}

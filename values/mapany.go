@@ -363,7 +363,7 @@ func (c MapAny) Value() (driver.Value, error) {
 
 func (c MapAny) CanonicalJSON() ([]byte, error) {
 	var buf bytes.Buffer
-	if err := writeCanonical(&buf, c); err != nil {
+	if err := WriteCanonicalJSON(&buf, c); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil

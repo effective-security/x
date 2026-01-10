@@ -52,3 +52,42 @@ func Test_Canonicalize_Mapany(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, `{"a":["2","1","3"],"b":[2,1,3],"c":null,"d":{"d":[3,4],"e":4,"f":{"g":5,"h":6}}}`, string(got))
 }
+
+func Test_MarshalCanonicalJSON(t *testing.T) {
+	m := MapAny{
+		"b": []int{2, 1, 3},
+		"a": []string{"2", "1", "3"},
+		"d": MapAny{
+			"d": []int{3, 4},
+			"e": 4,
+			"f": MapAny{
+				"g":      5,
+				"h":      6,
+				"false":  false,
+				"true":   true,
+				"null":   nil,
+				"string": "",
+				"number": 1.1,
+				"int":    0,
+				"uint":   uint(0),
+				"uint64": uint64(0),
+				"int64":  int64(0),
+			},
+		},
+		"c":      nil,
+		"e":      1.1,
+		"false":  false,
+		"true":   true,
+		"null":   nil,
+		"string": "string",
+		"number": 1.1,
+		"int":    1,
+		"uint":   uint(1),
+		"uint64": uint64(1),
+		"int64":  int64(1),
+	}
+	got, err := MarshalCanonicalJSON(m)
+	require.NoError(t, err)
+	exp := `{"a":["2","1","3"],"b":[2,1,3],"c":null,"d":{"d":[3,4],"e":4,"f":{"false":false,"g":5,"h":6,"int":0,"int64":0,"null":null,"number":1.1,"string":"","true":true,"uint":0,"uint64":0}},"e":1.1,"false":false,"int":1,"int64":1,"null":null,"number":1.1,"string":"string","true":true,"uint":1,"uint64":1}`
+	assert.Equal(t, exp, string(got))
+}
