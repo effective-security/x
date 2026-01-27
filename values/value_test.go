@@ -844,3 +844,27 @@ func Test_TraverseSubMaps(t *testing.T) {
 	})
 	assert.EqualError(t, err, "stop")
 }
+
+func Test_RenameKeys(t *testing.T) {
+	m := FromJSON(`{
+	"one":  {"two": {"three": "four"}},
+	"five": "six",
+	"bool": {
+		"filter": [
+			{"term1": {"status": "1"}},
+			{"term2": {"class": "2"}},
+			{"term3": {"enum": 3}}
+		]
+	},
+	"ints": [1,2,3,4]
+}`)
+	require.NotNil(t, m)
+	m2 := m.RenameKeys(func(k string) string {
+		return strings.ToUpper(k)
+	})
+	require.NotNil(t, m2)
+
+	js := m2.JSON()
+	exp2 := `{"BOOL":{"FILTER":[{"TERM1":{"STATUS":"1"}},{"TERM2":{"CLASS":"2"}},{"TERM3":{"ENUM":3}}]},"FIVE":"six","INTS":[1,2,3,4],"ONE":{"TWO":{"THREE":"four"}}}`
+	assert.Equal(t, exp2, string(js))
+}
