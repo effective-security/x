@@ -219,7 +219,11 @@ func (c MapAny) Map(k string) MapAny {
 	if c == nil {
 		return nil
 	}
-	return c[k].(map[string]any)
+	mapAny, ok := CastMapAny(c[k])
+	if !ok {
+		return nil
+	}
+	return mapAny
 }
 
 // GetOrSet returns existing value or set new value
@@ -266,7 +270,7 @@ func (c MapAny) Extract(path ...string) MapAny {
 			m = nil
 			break
 		}
-		objMap, ok := obj.(map[string]any)
+		objMap, ok := CastMapAny(obj)
 		if !ok {
 			m = nil
 			break
@@ -277,13 +281,44 @@ func (c MapAny) Extract(path ...string) MapAny {
 	return m
 }
 
+// RenameKeys renames the keys of the map recursively using the function f.
+func (c MapAny) RenameKeys(keyName func(key string) string) MapAny {
+	if c == nil {
+		return nil
+	}
+	if keyName == nil {
+		return c
+	}
+
+	result := make(MapAny, len(c))
+	for k, obj := range c {
+		renamedkey := keyName(k)
+		if objMap, ok := CastMapAny(obj); ok {
+			result[renamedkey] = objMap.RenameKeys(keyName)
+		} else if objSlice, ok := obj.([]any); ok {
+			var items []any
+			for _, item := range objSlice {
+				if itemMap, ok := CastMapAny(item); ok {
+					items = append(items, itemMap.RenameKeys(keyName))
+				} else {
+					items = append(items, item)
+				}
+			}
+			result[renamedkey] = items
+		} else {
+			result[renamedkey] = obj
+		}
+	}
+	return result
+}
+
+// TraverseSubMaps traverses the map and its sub-maps, calling the function f for each sub-map.
 func (c MapAny) TraverseSubMaps(f func(k string, v MapAny) (bool, error)) error {
 	if c == nil {
 		return nil
 	}
 	for k, obj := range c {
-		if IsMap(obj) {
-			objMap := obj.(map[string]any)
+		if objMap, ok := CastMapAny(obj); ok {
 			ok, err := f(k, objMap)
 			if err != nil {
 				return err
@@ -291,21 +326,16 @@ func (c MapAny) TraverseSubMaps(f func(k string, v MapAny) (bool, error)) error 
 			if !ok {
 				return nil
 			}
-			subMap := MapAny(objMap)
-			err = subMap.TraverseSubMaps(f)
+			err = objMap.TraverseSubMaps(f)
 			if err != nil {
 				return err
 			}
-		} else if IsSlice(obj) {
-			if objSlice, ok := obj.([]any); ok {
-				for _, item := range objSlice {
-					if IsMap(item) {
-						itemMap := item.(map[string]any)
-						subMap := MapAny(itemMap)
-						err := subMap.TraverseSubMaps(f)
-						if err != nil {
-							return err
-						}
+		} else if objSlice, ok := obj.([]any); ok {
+			for _, item := range objSlice {
+				if itemMap, ok := CastMapAny(item); ok {
+					err := itemMap.TraverseSubMaps(f)
+					if err != nil {
+						return err
 					}
 				}
 			}
@@ -392,4 +422,19 @@ func RangeOrderedMap[K constraints.Ordered, V any](c map[K]V, f func(k K, v V) b
 			break
 		}
 	}
+}
+
+// CastMapAny casts any to MapAny,
+// returns nil if the value is not a map[string]any or MapAny
+func CastMapAny(v any) (MapAny, bool) {
+	if v == nil {
+		return nil, false
+	}
+	if mapAny, ok := v.(MapAny); ok {
+		return mapAny, true
+	}
+	if mapAny, ok := v.(map[string]any); ok {
+		return MapAny(mapAny), true
+	}
+	return nil, false
 }
