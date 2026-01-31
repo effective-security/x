@@ -118,3 +118,13 @@ func Test_SliceDisplayNames(t *testing.T) {
 	assert.Equal(t, "", enum.SliceDisplayNamesString([]Severity_Enum{}))
 	assert.Equal(t, "", enum.SliceNamesString([]Severity_Enum{}))
 }
+
+func Test_BitMask(t *testing.T) {
+	assert.Equal(t, Severity_All, enum.BitMask([]Severity_Enum{Severity_Invalid, Severity_Unknown, Severity_Low, Severity_Medium, Severity_High, Severity_Critical, Severity_All}))
+	assert.Equal(t, Severity_Critical, enum.BitMask([]Severity_Enum{Severity_Critical}))
+	assert.Equal(t, Severity_High, enum.BitMask([]Severity_Enum{Severity_High}))
+	assert.Equal(t, Severity_Low, enum.BitMask([]Severity_Enum{Severity_Low}))
+	assert.Equal(t, Severity_Unknown, enum.BitMask([]Severity_Enum{Severity_Unknown}))
+	assert.Equal(t, Severity_Invalid, enum.BitMask([]Severity_Enum{Severity_Invalid}))
+	assert.Equal(t, Severity_Enum(0), enum.BitMask([]Severity_Enum{}))
+}
