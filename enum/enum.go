@@ -149,7 +149,7 @@ func FlagsInt[E Names](val E) []int32 {
 	return vals
 }
 
-// FlagsInt returns list of enum values from flag
+// Flags returns list of enum values from flag
 func Flags[E Names](val E) []E {
 	names := val.NamesMap()
 
@@ -160,4 +160,13 @@ func Flags[E Names](val E) []E {
 		}
 	}
 	return vals
+}
+
+// BitMask returns bitwise OR of the values
+func BitMask[E Enum](val []E) E {
+	var res E
+	for _, v := range val {
+		res |= v
+	}
+	return res
 }
