@@ -111,6 +111,20 @@ func (c MapAny) YAML() string {
 	return string(raw)
 }
 
+// Add adds a Non-Empty key-value pair to the map.
+func (c MapAny) Add(key string, value any) MapAny {
+	if key == "" || value == nil {
+		return c
+	}
+	if c == nil {
+		c = make(MapAny)
+	}
+	if !IsEmpty(value) {
+		c[key] = value
+	}
+	return c
+}
+
 // Has will return true if the map contains the key
 func (c MapAny) Has(k string) bool {
 	if c == nil {
