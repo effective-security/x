@@ -10,6 +10,7 @@ require (
 	github.com/oleiade/reflections v1.1.0
 	github.com/olekukonko/tablewriter v1.1.3
 	github.com/stretchr/testify v1.10.0
+	github.com/zeebo/xxh3 v1.1.0
 	go.uber.org/config v1.4.0
 	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa
 	google.golang.org/protobuf v1.36.11
@@ -27,6 +28,7 @@ require (
 	github.com/getsentry/sentry-go v0.43.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
