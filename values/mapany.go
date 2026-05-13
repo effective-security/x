@@ -6,12 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"sort"
 	"time"
 
 	"github.com/cockroachdb/errors"
+	"github.com/effective-security/x/maps"
 	"github.com/effective-security/xlog"
-	"golang.org/x/exp/constraints"
 	"gopkg.in/yaml.v3"
 )
 
@@ -413,25 +412,32 @@ func (c MapAny) CanonicalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// OrderedMapKeys returns ordered keys
-func OrderedMapKeys[K constraints.Ordered, V any](m map[K]V) []K {
-	r := make([]K, 0, len(m))
-	for k := range m {
-		r = append(r, k)
-	}
-	sort.Slice(r, func(i, j int) bool {
-		return r[i] < r[j]
-	})
-	return r
+func (c MapAny) Keys() []string {
+	return maps.Keys(c)
 }
 
-// RangeOrderedMap range over ordered map
-func RangeOrderedMap[K constraints.Ordered, V any](c map[K]V, f func(k K, v V) bool) {
+func (c MapAny) OrderedKeys() []string {
+	return maps.OrderedKeys(c)
+}
+
+// Range range over map keys
+func (c MapAny) Range(f func(k string, v any) bool) {
 	if c == nil {
 		return
 	}
+	for _, k := range c.Keys() {
+		if !f(k, c[k]) {
+			break
+		}
+	}
+}
 
-	for _, k := range OrderedMapKeys(c) {
+// OrderedRange range over map keys in order
+func (c MapAny) OrderedRange(f func(k string, v any) bool) {
+	if c == nil {
+		return
+	}
+	for _, k := range c.OrderedKeys() {
 		if !f(k, c[k]) {
 			break
 		}

@@ -1,11 +1,29 @@
 package maps
 
+import (
+	"sort"
+
+	"golang.org/x/exp/constraints"
+)
+
 // Keys returns all keys from the map as a slice
 func Keys[K comparable, V any](m map[K]V) []K {
 	keys := make([]K, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
+	return keys
+}
+
+// OrderedKeys returns all keys from the map as a slice
+func OrderedKeys[K constraints.Ordered, V any](m map[K]V) []K {
+	keys := make([]K, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
 	return keys
 }
 
@@ -230,4 +248,30 @@ func Drop[K comparable, V any](m map[K]V, n int) map[K]V {
 		count++
 	}
 	return result
+}
+
+// Range range over map keys
+func Range[K constraints.Ordered, V any](c map[K]V, f func(k K, v V) bool) {
+	if c == nil {
+		return
+	}
+
+	for _, k := range Keys(c) {
+		if !f(k, c[k]) {
+			break
+		}
+	}
+}
+
+// OrderedRange range over map keys in order
+func OrderedRange[K constraints.Ordered, V any](c map[K]V, f func(k K, v V) bool) {
+	if c == nil {
+		return
+	}
+
+	for _, k := range OrderedKeys(c) {
+		if !f(k, c[k]) {
+			break
+		}
+	}
 }
