@@ -22,7 +22,9 @@ func TestHash64(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			assert.Equal(t, xxh3.Hash(tc.data), XXH3Hash64(tc.data))
+			original := xxh3.Hash(tc.data)
+			assert.Equal(t, original, XXH3Hash64(tc.data))
+			assert.NotEqual(t, original, XXH3HashArgs64(tc.data))
 		})
 	}
 }
