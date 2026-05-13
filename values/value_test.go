@@ -750,17 +750,6 @@ func TestSelect(t *testing.T) {
 	assert.Equal(t, uint64(0), Select(true, 0, uint64(1)))
 }
 
-func TestRangeOrderedMap(t *testing.T) {
-	m1 := map[string]string{"ya": "1", "b": "2", "c": "3"}
-
-	var keys []string
-	RangeOrderedMap(m1, func(k, v string) bool {
-		keys = append(keys, k)
-		return true
-	})
-	assert.Equal(t, []string{"b", "c", "ya"}, keys)
-}
-
 func Test_MapAny_DB(t *testing.T) {
 	tcases := []struct {
 		val MapAny
@@ -867,4 +856,36 @@ func Test_RenameKeys(t *testing.T) {
 	js := m2.JSON()
 	exp2 := `{"BOOL":{"FILTER":[{"TERM1":{"STATUS":"1"}},{"TERM2":{"CLASS":"2"}},{"TERM3":{"ENUM":3}}]},"FIVE":"six","INTS":[1,2,3,4],"ONE":{"TWO":{"THREE":"four"}}}`
 	assert.Equal(t, exp2, string(js))
+}
+
+func Test_MapAny_Range(t *testing.T) {
+	m := FromJSON(`{
+	"one":  {"two": {"three": "four"}},
+	"five": "six",
+	"bool": {
+		"filter": [
+			{"term1": {"status": "1"}},
+			{"term2": {"class": "2"}},
+			{"term3": {"enum": 3}}
+		]
+	},
+	"ints": [1,2,3,4]
+}`)
+	require.NotNil(t, m)
+
+	var keys []string
+	m.OrderedRange(func(k string, v any) bool {
+		keys = append(keys, k)
+		return true
+	})
+	sort.Strings(keys)
+	assert.Equal(t, []string{"bool", "five", "ints", "one"}, keys)
+
+	var keys2 []string
+	m.Range(func(k string, v any) bool {
+		keys2 = append(keys2, k)
+		return true
+	})
+	sort.Strings(keys2)
+	assert.Equal(t, len(keys2), len(keys))
 }

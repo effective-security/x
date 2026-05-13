@@ -485,3 +485,21 @@ func TestFunctionalOperationsEdgeCases(t *testing.T) {
 		return false
 	}))
 }
+
+func TestRangeOrderedMap(t *testing.T) {
+	m1 := map[string]string{"ya": "1", "b": "2", "c": "3"}
+
+	var keys []string
+	maps.OrderedRange(m1, func(k, v string) bool {
+		keys = append(keys, k)
+		return true
+	})
+	assert.Equal(t, []string{"b", "c", "ya"}, keys)
+
+	var keys2 []string
+	maps.Range(m1, func(k, v string) bool {
+		keys2 = append(keys2, k)
+		return true
+	})
+	assert.Equal(t, len(keys2), len(keys))
+}
