@@ -29,40 +29,6 @@ func XXH3Hash128Hex(data []byte) string {
 	return hex.EncodeToString(XXH3Hash128(data))
 }
 
-var hashDelimiter = []byte{0xff}
-
-func hash128write(h *xxh3.Hasher128, p []byte) {
-	_, _ = h.Write(p)
-}
-
-func hash128writeString(h *xxh3.Hasher128, s string) {
-	_, _ = h.WriteString(s)
-}
-
-func hash128writeUint64(h *xxh3.Hasher128, p uint64) {
-	data := [8]byte{
-		byte(p >> 56),
-		byte(p >> 48),
-		byte(p >> 40),
-		byte(p >> 32),
-		byte(p >> 24),
-		byte(p >> 16),
-		byte(p >> 8),
-		byte(p),
-	}
-	_, _ = h.Write(data[:])
-}
-
-func hash128writeUint32(h *xxh3.Hasher128, p uint32) {
-	data := [4]byte{
-		byte(p >> 24),
-		byte(p >> 16),
-		byte(p >> 8),
-		byte(p),
-	}
-	_, _ = h.Write(data[:])
-}
-
 // XXH3HashArgs128Hex returns a 128-bit XXH3 digest over variadic arguments, encoded as lowercase hex (32 characters).
 //
 // Supported types: string, []string, numeric scalars and slices (uint64, int64, uint32, int32, int), bool and []bool,
@@ -70,77 +36,103 @@ func hash128writeUint32(h *xxh3.Hasher128, p uint32) {
 // String and []string elements are followed by a zero byte delimiter so adjacent fields do not merge ambiguously.
 // Slices of fixed-width types are written without per-element delimiters; argument order and Go types distinguish fields.
 func XXH3HashArgs128Hex(data ...any) string {
+	return hex.EncodeToString(XXH3HashArgs128(data...))
+}
+
+// XXH3HashArgs128 returns a 128-bit XXH3 digest over variadic arguments.
+//
+// Supported types: string, []string, numeric scalars and slices (uint64, int64, uint32, int32, int), bool and []bool,
+// []byte, enum.ProtoEnum and []enum.ProtoEnum. Other values are serialized with String(v) (see package values).
+// String and []string elements are followed by a zero byte delimiter so adjacent fields do not merge ambiguously.
+// Slices of fixed-width types are written without per-element delimiters; argument order and Go types distinguish fields.
+func XXH3HashArgs128(data ...any) []byte {
 	hash := xxh3.New128()
+	hashWriteArgs(hash, data...)
+	return hash.Sum(nil)
+}
+
+// XXH3HashArgs64 returns a 64-bit XXH3 digest over variadic arguments.
+//
+// Supported types: string, []string, numeric scalars and slices (uint64, int64, uint32, int32, int), bool and []bool,
+// []byte, enum.ProtoEnum and []enum.ProtoEnum. Other values are serialized with String(v) (see package values).
+// String and []string elements are followed by a zero byte delimiter so adjacent fields do not merge ambiguously.
+// Slices of fixed-width types are written without per-element delimiters; argument order and Go types distinguish fields.
+func XXH3HashArgs64(data ...any) uint64 {
+	hash := xxh3.New()
+	hashWriteArgs(hash, data...)
+	return hash.Sum64()
+}
+
+func hashWriteArgs(hash hasher, data ...any) {
 	for _, v := range data {
 		switch v := v.(type) {
 		case string:
-			hash128writeUint64(hash, uint64(len(v)))
-			hash128writeString(hash, v)
-			hash128write(hash, hashDelimiter)
+			hashWriteUint64(hash, uint64(len(v)))
+			hashWriteString(hash, v)
+			hashWrite(hash, hashDelimiter)
 		case []string:
-			hash128write(hash, IntToBytes(len(v)))
+			hashWrite(hash, IntToBytes(len(v)))
 			for _, v := range v {
-				hash128writeString(hash, v)
-				hash128write(hash, hashDelimiter)
+				hashWriteString(hash, v)
+				hashWrite(hash, hashDelimiter)
 			}
 		case []uint64:
-			hash128writeUint64(hash, uint64(len(v)))
+			hashWriteUint64(hash, uint64(len(v)))
 			for _, v := range v {
-				hash128writeUint64(hash, v)
+				hashWriteUint64(hash, v)
 			}
 		case []int64:
-			hash128writeUint64(hash, uint64(len(v)))
+			hashWriteUint64(hash, uint64(len(v)))
 			for _, v := range v {
-				hash128writeUint64(hash, uint64(v))
+				hashWriteUint64(hash, uint64(v))
 			}
 		case []uint32:
-			hash128writeUint32(hash, uint32(len(v)))
+			hashWriteUint32(hash, uint32(len(v)))
 			for _, v := range v {
-				hash128writeUint32(hash, v)
+				hashWriteUint32(hash, v)
 			}
 		case []int32:
-			hash128writeUint32(hash, uint32(len(v)))
+			hashWriteUint32(hash, uint32(len(v)))
 			for _, v := range v {
-				hash128writeUint32(hash, uint32(v))
+				hashWriteUint32(hash, uint32(v))
 			}
 		case []int:
-			hash128writeUint64(hash, uint64(len(v)))
+			hashWriteUint64(hash, uint64(len(v)))
 			for _, v := range v {
-				hash128writeUint64(hash, uint64(v))
+				hashWriteUint64(hash, uint64(v))
 			}
 		case []bool:
-			hash128writeUint64(hash, uint64(len(v)))
+			hashWriteUint64(hash, uint64(len(v)))
 			for _, v := range v {
-				hash128write(hash, BoolToBytes(v))
+				hashWrite(hash, BoolToBytes(v))
 			}
 		case []enum.ProtoEnum:
-			hash128writeUint64(hash, uint64(len(v)))
+			hashWriteUint64(hash, uint64(len(v)))
 			for _, v := range v {
-				hash128write(hash, Uint64ToBytes(uint64(v.Number())))
+				hashWrite(hash, Uint64ToBytes(uint64(v.Number())))
 			}
 		case []byte:
-			hash128writeUint64(hash, uint64(len(v)))
-			hash128write(hash, v)
-			hash128write(hash, hashDelimiter)
+			hashWriteUint64(hash, uint64(len(v)))
+			hashWrite(hash, v)
+			hashWrite(hash, hashDelimiter)
 		case uint64:
-			hash128writeUint64(hash, v)
+			hashWriteUint64(hash, v)
 		case int64:
-			hash128writeUint64(hash, uint64(v))
+			hashWriteUint64(hash, uint64(v))
 		case uint32:
-			hash128writeUint32(hash, v)
+			hashWriteUint32(hash, v)
 		case int32:
-			hash128writeUint32(hash, uint32(v))
+			hashWriteUint32(hash, uint32(v))
 		case int:
-			hash128writeUint64(hash, uint64(v))
+			hashWriteUint64(hash, uint64(v))
 		case bool:
-			hash128writeUint64(hash, uint64(Select(v, 1, 0)))
+			hashWriteUint64(hash, uint64(Select(v, 1, 0)))
 		case enum.ProtoEnum:
-			hash128writeUint64(hash, uint64(v.Number()))
+			hashWriteUint64(hash, uint64(v.Number()))
 		default:
-			hash128writeString(hash, String(v))
+			hashWriteString(hash, String(v))
 		}
 	}
-	return hex.EncodeToString(hash.Sum(nil))
 }
 
 // Uint64ToBytes returns v in big-endian order (8 bytes). It is used for deterministic hashing of integers.
@@ -176,4 +168,43 @@ func Uint32ToBytes(v uint32) []byte {
 // BoolToBytes returns []byte{1} or []byte{0}. It is used for deterministic hashing of booleans.
 func BoolToBytes(v bool) []byte {
 	return []byte{byte(Select(v, 1, 0))}
+}
+
+var hashDelimiter = []byte{0xff}
+
+func hashWrite(h hasher, p []byte) {
+	_, _ = h.Write(p)
+}
+
+func hashWriteString(h hasher, s string) {
+	_, _ = h.WriteString(s)
+}
+
+func hashWriteUint64(h hasher, p uint64) {
+	data := [8]byte{
+		byte(p >> 56),
+		byte(p >> 48),
+		byte(p >> 40),
+		byte(p >> 32),
+		byte(p >> 24),
+		byte(p >> 16),
+		byte(p >> 8),
+		byte(p),
+	}
+	_, _ = h.Write(data[:])
+}
+
+func hashWriteUint32(h hasher, p uint32) {
+	data := [4]byte{
+		byte(p >> 24),
+		byte(p >> 16),
+		byte(p >> 8),
+		byte(p),
+	}
+	_, _ = h.Write(data[:])
+}
+
+type hasher interface {
+	Write(p []byte) (n int, err error)
+	WriteString(buf string) (int, error)
 }
