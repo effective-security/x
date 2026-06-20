@@ -530,7 +530,7 @@ func JSONIndent(value any) string {
 	if value == nil {
 		return ""
 	}
-	b, _ := json.MarshalIndent(value, "", "\t")
+	b, _ := json.MarshalIndent(value, "", "  ")
 	return string(b)
 }
 
@@ -538,8 +538,11 @@ func JSONIndent(value any) string {
 // It will return the original string if it fails to indent
 // This is useful for pretty printing JSON strings
 func IndentJSON(data string) string {
+	if data == "" || data == "null" || data == "[]" || data == "{}" {
+		return data
+	}
 	var buf bytes.Buffer
-	if err := json.Indent(&buf, []byte(data), "", "\t"); err == nil {
+	if err := json.Indent(&buf, []byte(data), "", "  "); err == nil {
 		return buf.String()
 	}
 	return data
