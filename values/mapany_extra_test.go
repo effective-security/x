@@ -72,7 +72,7 @@ func TestMapAnyFromProtoValue(t *testing.T) {
 				},
 			},
 			exp: `{
-	"S": "value"
+  "S": "value"
 }`,
 		},
 		{
@@ -90,23 +90,23 @@ func TestMapAnyFromProtoValue(t *testing.T) {
 				Ints: []int{1, 2, 3, 0, 0, 0},
 			},
 			exp: `{
-	"I": 1,
-	"Ints": [
-		1,
-		2,
-		3
-	],
-	"List": [
-		"value",
-		"value2"
-	],
-	"M": {
-		"field": "value"
-	},
-	"Ob": {
-		"field": "value"
-	},
-	"S": "value"
+  "I": 1,
+  "Ints": [
+    1,
+    2,
+    3
+  ],
+  "List": [
+    "value",
+    "value2"
+  ],
+  "M": {
+    "field": "value"
+  },
+  "Ob": {
+    "field": "value"
+  },
+  "S": "value"
 }`,
 		},
 	}

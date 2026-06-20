@@ -53,7 +53,7 @@ func FromStruct(value any) MapAny {
 // this method does not return value on error, as the value is expected a valid JSON string.
 func FromJSON(s string) MapAny {
 	var val MapAny
-	if s != "" && s != "{}" && s != "[]" {
+	if s != "" && s != "{}" && s != "[]" && s != "null" {
 		err := json.Unmarshal([]byte(s), &val)
 		if err != nil {
 			logger.KV(xlog.DEBUG,
@@ -97,6 +97,9 @@ func (c MapAny) To(val any) error {
 
 // JSON returns JSON encoded string
 func (c MapAny) JSON() string {
+	if len(c) == 0 {
+		return ""
+	}
 	return JSON(c)
 }
 
@@ -106,6 +109,9 @@ func (c MapAny) JSONIndent() string {
 
 // YAML returns YAML encoded string
 func (c MapAny) YAML() string {
+	if len(c) == 0 {
+		return ""
+	}
 	raw, _ := yaml.Marshal(c)
 	return string(raw)
 }

@@ -27,10 +27,10 @@ func TestValues(t *testing.T) {
 
 	assert.Equal(t, `{"aud":["t1"],"jti":"123"}`, c.JSON())
 	expIndent := `{
-	"aud": [
-		"t1"
-	],
-	"jti": "123"
+  "aud": [
+    "t1"
+  ],
+  "jti": "123"
 }`
 	assert.Equal(t, expIndent, c.JSONIndent())
 	assert.Equal(t, expIndent, IndentJSON(`{"aud":["t1"],"jti":"123"}`))
