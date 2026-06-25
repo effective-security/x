@@ -832,6 +832,28 @@ func Test_TraverseSubMaps(t *testing.T) {
 		return true, nil
 	})
 	assert.EqualError(t, err, "stop")
+
+	m2 := MapAny{
+		"one": MapAny{
+			"two": []MapAny{
+				{
+					"two_one": "four",
+				},
+				{
+					"two_two": "five",
+				},
+			},
+		},
+	}
+	keys = nil
+
+	err = m2.TraverseSubMaps(func(k string, v MapAny) (bool, error) {
+		keys = append(keys, k)
+		return true, nil
+	})
+	require.NoError(t, err)
+	sort.Strings(keys)
+	assert.Equal(t, []string{"one"}, keys)
 }
 
 func Test_RenameKeys(t *testing.T) {
