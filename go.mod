@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/kong v1.15.0
 	github.com/cockroachdb/errors v1.14.0
 	github.com/deckarep/golang-set v1.8.0
-	github.com/effective-security/xlog v0.11.54
+	github.com/effective-security/xlog v0.11.55
 	github.com/oleiade/reflections v1.1.0
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/stretchr/testify v1.11.1

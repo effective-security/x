@@ -358,6 +358,13 @@ func (c MapAny) TraverseSubMaps(f func(k string, v MapAny) (bool, error)) error 
 					}
 				}
 			}
+		} else if objSlice, ok := obj.([]MapAny); ok {
+			for _, item := range objSlice {
+				err := item.TraverseSubMaps(f)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil
