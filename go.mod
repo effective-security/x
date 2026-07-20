@@ -3,7 +3,7 @@ module github.com/effective-security/x
 go 1.26.1
 
 require (
-	github.com/alecthomas/kong v1.15.0
+	github.com/alecthomas/kong v1.16.0
 	github.com/cockroachdb/errors v1.14.0
 	github.com/deckarep/golang-set v1.8.0
 	github.com/effective-security/xlog v0.11.55
