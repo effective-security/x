@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/cockroachdb/errors"
+	"github.com/mitchellh/go-homedir"
 )
 
 // Directory returns absolute dir name relative to baseDir,
@@ -45,4 +46,21 @@ func File(file string, baseDir string) (resolved string, err error) {
 		return resolved, errors.WithMessagef(err, "not found: %v", resolved)
 	}
 	return resolved, nil
+}
+
+// ExpandPath returns extrapolated path with resolved ~ or env vars.
+// It replaces ${var} or $var in the string according to the values
+// of the current environment variables. References to undefined
+// variables are replaced by the empty string.
+func ExpandPath(file string) string {
+	if file == "" {
+		return file
+	}
+
+	// firt resolve any env vars in the path
+	file = os.ExpandEnv(file)
+
+	// then resolve ~
+	file, _ = homedir.Expand(file)
+	return file
 }
