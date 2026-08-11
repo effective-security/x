@@ -80,3 +80,23 @@ func Test_File(t *testing.T) {
 	_, err = resolve.File(fabs+".junk", "/does/not/matter")
 	assert.Error(t, err)
 }
+
+func Test_ExpandPath(t *testing.T) {
+	t.Setenv("TEST_VAR", "test_value")
+	t.Setenv("HOME", "/home/test")
+
+	p := resolve.ExpandPath("")
+	assert.Empty(t, p)
+
+	p = resolve.ExpandPath("~/test_value")
+	assert.Equal(t, "/home/test/test_value", p)
+
+	p = resolve.ExpandPath("${TEST_VAR}")
+	assert.Equal(t, "test_value", p)
+
+	p = resolve.ExpandPath("~/test_value/${TEST_VAR}")
+	assert.Equal(t, "/home/test/test_value/test_value", p)
+
+	p = resolve.ExpandPath("~/test_value/$TEST_VAR/test_value")
+	assert.Equal(t, "/home/test/test_value/test_value/test_value", p)
+}
