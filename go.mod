@@ -13,7 +13,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/zeebo/xxh3 v1.1.0
 	go.uber.org/config v1.4.1
-	golang.org/x/exp v0.0.0-20260811152304-ee035b5b010f
+	golang.org/x/exp v0.0.0-20260813180055-c1d0aacb2297
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
 )
