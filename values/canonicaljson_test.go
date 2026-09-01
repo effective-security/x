@@ -340,7 +340,7 @@ func Test_MarshalCanonicalJSON_Errors(t *testing.T) {
 		{name: "invalid_raw_in_map", val: MapAny{"a": json.RawMessage(`}`)}, experr: "decode json: invalid character '}' looking for beginning of value"},
 		{name: "invalid_raw_in_slice", val: []any{1, json.RawMessage(`}`)}, experr: "decode json: invalid character '}' looking for beginning of value"},
 		{name: "unsupported_value", val: MapAny{"a": make(chan int)}, experr: "marshal value: json: unsupported type: chan int"},
-		{name: "failing_marshaler", val: failingMarshaler{}, experr: "marshal value: json: error calling MarshalJSON for type values.failingMarshaler: failed to marshal"},
+		{name: "failing_marshaler", val: failingMarshaler{}, experr: "marshal value: json: error calling MarshalJSON for type *values.failingMarshaler: failed to marshal"},
 		{name: "too_deep", val: deep, experr: "json value exceeds max nesting depth: 1000"},
 		{name: "cyclic", val: cyclic, experr: "json value exceeds max nesting depth: 1000"},
 	}
