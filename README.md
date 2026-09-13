@@ -4,21 +4,22 @@
 
 ## Supported Packages
 
-| Package        | Description                                             |
-| -------------- | ------------------------------------------------------- |
-| configloader   | Load JSON/YAML config with environment overrides        |
-| ctl            | Kong-based CLI helpers (version flag, bool-pointer)     |
-| enum           | Generic enum and bit-flag helpers (Go 1.18+ generics)   |
-| fileutil       | File and folder utilities, live file reloader, resolver |
-| flake          | Sonyflake-inspired unique ID generator                  |
-| format         | String, number, boolean, and time formatting utilities  |
-| guid           | Simple GUID/UUID generator                              |
-| netutil        | Free port discovery, local IP, node info, URL parsing   |
-| print          | JSON/YAML/table/text printers                           |
-| slices         | Common slice operations (equal, contains, unique, etc.) |
-| ticker         | Context-aware ticker with callback and status tracking  |
-| urlutil        | URL and querystring helpers, public endpoint builder    |
-| values         | Generic any-to-typed conversion and MapAny utilities    |
+| Package      | Description                                             |
+| ------------ | ------------------------------------------------------- |
+| configloader | Load JSON/YAML config with environment overrides        |
+| ctl          | Kong-based CLI helpers (version flag, bool-pointer)     |
+| enum         | Generic enum and bit-flag helpers (Go 1.18+ generics)   |
+| fileutil     | File and folder utilities, live file reloader, resolver |
+| flake        | Sonyflake-inspired unique ID generator                  |
+| format       | String, number, boolean, and time formatting utilities  |
+| guid         | Simple GUID/UUID generator                              |
+| maps         | Generic map helpers and typed `sync.Map`                |
+| netutil      | Free port discovery, local IP, node info, URL parsing   |
+| print        | JSON/YAML/table/text printers                           |
+| slices       | Common slice operations (equal, contains, unique, etc.) |
+| ticker       | Context-aware ticker with callback and status tracking  |
+| urlutil      | URL and querystring helpers, public endpoint builder    |
+| values       | Generic any-to-typed conversion and MapAny utilities    |
 
 ## Installation
 
@@ -62,7 +63,7 @@ See individual package directories for more examples and detailed documentation.
 
 ## Development
 
-Requires Go 1.24 or newer and GNU Make.
+Requires Go 1.27 or newer and GNU Make.
 
 ```bash
 # List available make targets

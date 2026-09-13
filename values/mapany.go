@@ -24,7 +24,7 @@ func FromStruct(value any) MapAny {
 
 	v := reflect.ValueOf(value)
 	// Handle pointers
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		if v.IsNil() {
 			return nil
 		}
