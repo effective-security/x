@@ -89,7 +89,7 @@ func String(v any) string {
 		kind := reflect.TypeOf(v).Kind()
 		if kind == reflect.Slice {
 			v := reflect.ValueOf(v)
-			if v.Kind() == reflect.Ptr {
+			if v.Kind() == reflect.Pointer {
 				v = v.Elem()
 			}
 			list := make([]string, v.Len())
@@ -195,7 +195,7 @@ func IntSlice(v any) []int {
 		kind := reflect.TypeOf(v).Kind()
 		if kind == reflect.Slice {
 			v := reflect.ValueOf(v)
-			if v.Kind() == reflect.Ptr {
+			if v.Kind() == reflect.Pointer {
 				v = v.Elem()
 			}
 			list := make([]int, v.Len())
@@ -563,7 +563,7 @@ func IsEmpty(value any) bool {
 		return v.Len() == 0
 	case reflect.Map:
 		return v.Len() == 0
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if v.IsNil() {
 			return true
 		}
@@ -592,7 +592,7 @@ func Shrink(value any) any {
 	v := reflect.ValueOf(value)
 
 	// Handle pointers
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		if v.IsNil() {
 			return nil
 		}

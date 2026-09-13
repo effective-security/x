@@ -65,7 +65,7 @@ func (f *Expander) Expand(s string) (string, error) {
 }
 
 func (f *Expander) doSubstituteEnvVars(v reflect.Value) error {
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
 	if !v.IsValid() {
@@ -93,7 +93,7 @@ func (f *Expander) doSubstituteEnvVars(v reflect.Value) error {
 			}
 			v.SetString(val)
 		}
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if err := f.doSubstituteEnvVars(v.Elem()); err != nil {
 			return err
 		}
