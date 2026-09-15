@@ -1,93 +1,131 @@
-package reloader_test
+package reloader
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/effective-security/x/fileutil/reloader"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func Test_Reloader(t *testing.T) {
-	now := time.Now().UTC()
+const testCheckInterval = 100 * time.Millisecond
 
-	file := filepath.Join(os.TempDir(), "test-reloaded.txt")
-
-	callbackCount := 0
-	lastModifiedAt := time.Now()
-	onChangedFunc := func(fn string, modifiedAt time.Time) {
-		assert.Equal(t, file, fn)
-		if callbackCount > 0 {
-			assert.True(t, modifiedAt.After(lastModifiedAt), fmt.Sprintf("this=%v, last=%v", modifiedAt, lastModifiedAt))
-		}
-		lastModifiedAt = modifiedAt
-		callbackCount++
-	}
-
-	err := ioutil.WriteFile(file, []byte("Test_Reloader"), os.ModePerm)
-	require.NoError(t, err)
-
-	k, err := reloader.NewReloader(file, 100*time.Millisecond, onChangedFunc)
-	require.NoError(t, err)
-	require.NotNil(t, k)
-	defer k.Close()
-
-	_ = k.Reload()
-
-	loadedAt := k.LoadedAt()
-	assert.True(t, loadedAt.After(now), "loaded time must be after test start time")
-	assert.Equal(t, uint32(1), k.LoadedCount())
-
-	err = ioutil.WriteFile(file, []byte("Test_Reloader2"), os.ModePerm)
-	require.NoError(t, err)
-	time.Sleep(2 * time.Millisecond)
-	err = ioutil.WriteFile(file, []byte("Test_Reloader3"), os.ModePerm)
-	require.NoError(t, err)
-
-	time.Sleep(200 * time.Millisecond)
-
-	loadedAt2 := k.LoadedAt()
-	count := int(k.LoadedCount())
-	assert.Equal(t, callbackCount, count)
-	assert.True(t, count >= 2 && count <= 4, "must be loaded at start, whithin period and after, loaded: %d", k.LoadedCount())
-	assert.True(t, loadedAt2.After(loadedAt), "re-loaded time must be after last loaded time")
-
-	err = ioutil.WriteFile(file, []byte("Test_Reloader4"), os.ModePerm)
-	require.NoError(t, err)
-	time.Sleep(2 * time.Millisecond)
-	err = ioutil.WriteFile(file, []byte("Test_Reloader5"), os.ModePerm)
-	require.NoError(t, err)
-
-	time.Sleep(200 * time.Millisecond)
-
-	loadedAt3 := k.LoadedAt()
-	count = int(k.LoadedCount())
-	assert.Equal(t, callbackCount, count)
-	assert.True(t, count >= 3 && count <= 5, "must be loaded at start, whithin period and after, loaded: %d", k.LoadedCount())
-	assert.True(t, loadedAt3.After(loadedAt2), "re-loaded time must be after last loaded time")
+type reloadEvent struct {
+	filePath   string
+	modifiedAt time.Time
 }
 
-func Test_ReloaderClose(t *testing.T) {
-	var k *reloader.Reloader
-	assert.NotPanics(t, func() {
-		k.Close()
-	})
+func TestReloader(t *testing.T) {
+	tick := make(chan time.Time)
+	stopped := make(chan struct{})
+	previousMakeTicker := makeTicker
+	makeTicker = func(interval time.Duration) (func(), <-chan time.Time) {
+		assert.Equal(t, testCheckInterval, interval)
+		return func() { close(stopped) }, tick
+	}
+	t.Cleanup(func() { makeTicker = previousMakeTicker })
 
-	file := filepath.Join(os.TempDir(), "test-reloaded.txt")
+	file := filepath.Join(t.TempDir(), "reloaded.txt")
+	require.NoError(t, os.WriteFile(file, []byte("initial"), 0o600))
 
-	k, err := reloader.NewReloader(file, 100*time.Millisecond, func(fn string, modifiedAt time.Time) {})
+	events := make(chan reloadEvent, 2)
+	onChanged := func(filePath string, modifiedAt time.Time) {
+		events <- reloadEvent{
+			filePath:   filePath,
+			modifiedAt: modifiedAt,
+		}
+	}
+
+	startedAt := time.Now().UTC()
+	r, err := NewReloader(file, testCheckInterval, onChanged)
 	require.NoError(t, err)
-	require.NotNil(t, k)
+	require.NotNil(t, r)
 
-	err = k.Close()
-	assert.NoError(t, err)
+	require.NoError(t, r.Reload())
+	first := receiveReloadEvent(t, events)
+	assert.Equal(t, file, first.filePath)
+	assert.True(t, first.modifiedAt.IsZero())
+	assert.True(t, r.LoadedAt().After(startedAt))
+	assert.Equal(t, uint32(1), r.LoadedCount())
 
-	err = k.Close()
+	modifiedAt := time.Now().Add(time.Second)
+	require.NoError(t, os.Chtimes(file, modifiedAt, modifiedAt))
+	tick <- time.Now()
+	second := receiveReloadEvent(t, events)
+	assert.Equal(t, file, second.filePath)
+	assert.True(t, modifiedAt.Equal(second.modifiedAt))
+	assert.Equal(t, uint32(2), r.LoadedCount())
+
+	require.NoError(t, r.Close())
+	receiveSignal(t, stopped)
+	err = r.Close()
 	require.Error(t, err)
 	assert.Equal(t, "already closed", err.Error())
+}
+
+func TestReloaderNilCallback(t *testing.T) {
+	tick := make(chan time.Time)
+	previousMakeTicker := makeTicker
+	makeTicker = func(time.Duration) (func(), <-chan time.Time) {
+		return func() {}, tick
+	}
+	t.Cleanup(func() { makeTicker = previousMakeTicker })
+
+	r, err := NewReloader("unused", testCheckInterval, nil)
+	require.NoError(t, err)
+	require.NoError(t, r.Reload())
+	assert.Equal(t, uint32(1), r.LoadedCount())
+	require.NoError(t, r.Close())
+}
+
+func TestReloaderCloseConcurrent(t *testing.T) {
+	tick := make(chan time.Time)
+	previousMakeTicker := makeTicker
+	makeTicker = func(time.Duration) (func(), <-chan time.Time) {
+		return func() {}, tick
+	}
+	t.Cleanup(func() { makeTicker = previousMakeTicker })
+
+	r, err := NewReloader("unused", testCheckInterval, nil)
+	require.NoError(t, err)
+
+	errs := make(chan error, 2)
+	go func() { errs <- r.Close() }()
+	go func() { errs <- r.Close() }()
+	firstErr := <-errs
+	secondErr := <-errs
+	assert.True(t, (firstErr == nil) != (secondErr == nil))
+	if firstErr != nil {
+		assert.Equal(t, "already closed", firstErr.Error())
+	}
+	if secondErr != nil {
+		assert.Equal(t, "already closed", secondErr.Error())
+	}
+}
+
+func TestReloaderCloseNil(t *testing.T) {
+	var r *Reloader
+	assert.NoError(t, r.Close())
+}
+
+func receiveReloadEvent(t *testing.T, events <-chan reloadEvent) reloadEvent {
+	t.Helper()
+	select {
+	case event := <-events:
+		return event
+	case <-time.After(time.Second):
+		require.FailNow(t, "timed out waiting for reload callback")
+		return reloadEvent{}
+	}
+}
+
+func receiveSignal(t *testing.T, signal <-chan struct{}) {
+	t.Helper()
+	select {
+	case <-signal:
+	case <-time.After(time.Second):
+		require.FailNow(t, "timed out waiting for signal")
+	}
 }

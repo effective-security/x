@@ -30,22 +30,21 @@ type Reloader struct {
 	fileModifiedAt time.Time
 	onChangedFunc  OnChangedFunc
 	inProgress     bool
-	stopChan       chan<- struct{}
+	stopChan       chan struct{}
 	closed         bool
 }
 
 // NewReloader return an instance of the file re-loader
 func NewReloader(filePath string, checkInterval time.Duration, onChangedFunc OnChangedFunc) (*Reloader, error) {
+	stopChan := make(chan struct{})
 	result := &Reloader{
 		filePath:      filePath,
 		onChangedFunc: onChangedFunc,
-		stopChan:      make(chan struct{}),
+		stopChan:      stopChan,
 	}
 
 	logger.KV(xlog.INFO, "status", "started", "file", filePath)
 
-	stopChan := make(chan struct{})
-	result.stopChan = stopChan
 	tickerStop, tickChan := makeTicker(checkInterval)
 	go func() {
 		for {
@@ -55,19 +54,22 @@ func NewReloader(filePath string, checkInterval time.Duration, onChangedFunc OnC
 				logger.KV(xlog.INFO, "status", "closed", "count", result.LoadedCount(), "file", filePath)
 				return
 			case <-tickChan:
-				modified := false
 				fi, err := os.Stat(filePath)
-				if err == nil {
-					modified = fi.ModTime().After(result.fileModifiedAt)
-					if modified {
-						result.fileModifiedAt = fi.ModTime()
-						err := result.Reload()
-						if err != nil {
-							logger.KV(xlog.ERROR, "err", err)
-						}
-					}
-				} else {
+				if err != nil {
 					logger.KV(xlog.WARNING, "reason", "stat", "file", filePath, "err", err)
+					continue
+				}
+				modTime := fi.ModTime()
+				result.lock.Lock()
+				modified := modTime.After(result.fileModifiedAt)
+				if modified {
+					result.fileModifiedAt = modTime
+				}
+				result.lock.Unlock()
+				if modified {
+					if err := result.Reload(); err != nil {
+						logger.KV(xlog.ERROR, "err", err)
+					}
 				}
 			}
 		}
@@ -84,15 +86,17 @@ func (k *Reloader) Reload() error {
 	}
 
 	k.inProgress = true
-	defer func() {
-		k.inProgress = false
-		k.lock.Unlock()
-	}()
-
+	modifiedAt := k.fileModifiedAt
+	path := k.filePath
+	cb := k.onChangedFunc
 	atomic.AddUint32(&k.count, 1)
 	k.loadedAt = time.Now().UTC()
+	k.inProgress = false
+	k.lock.Unlock()
 
-	go k.onChangedFunc(k.filePath, k.fileModifiedAt)
+	if cb != nil {
+		go cb(path, modifiedAt)
+	}
 
 	return nil
 }
@@ -116,15 +120,15 @@ func (k *Reloader) Close() error {
 		return nil
 	}
 
-	k.lock.RLock()
-	defer k.lock.RUnlock()
+	k.lock.Lock()
+	defer k.lock.Unlock()
 
 	if k.closed {
 		return errors.New("already closed")
 	}
 
 	k.closed = true
-	k.stopChan <- struct{}{}
+	close(k.stopChan)
 
 	return nil
 }

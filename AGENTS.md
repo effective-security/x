@@ -56,7 +56,7 @@ Do not start by grepping the tree.
 - Keep error strings accurate after refactors. Do not leave stale package
   or function names in runtime errors.
 - Panic is part of some public APIs (`flake.NewIDGenerator` / `NextID`,
-  `guid.MustCreate`, `configloader.ResolveConfigFile` on empty path,
+  `configloader.ResolveConfigFile` on empty path,
   `values.FromStruct` on non-structs). Do not convert those to returned
   errors unless the package contract is being changed on purpose — and
   then update the codemap.
@@ -73,8 +73,7 @@ Do not start by grepping the tree.
 - Put extra coverage in `*_extra_test.go` when extending an already large
   test file. Use `package foo_test` for black-box tests.
 - Override package hooks instead of sleeping or depending on wall clocks:
-  `flake.NowFunc`, `format.NowFunc`, `guid` `randRead`, `reloader`
-  `makeTicker`.
+  `flake.NowFunc`, `format.NowFunc`, `reloader` `makeTicker`.
 - This module has no gomock-generated interfaces; do not introduce mocks
   unless the package under test cannot be exercised directly.
 

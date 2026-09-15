@@ -6,6 +6,7 @@ import (
 	"syscall"
 	"testing"
 
+	"github.com/cockroachdb/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,6 +15,7 @@ func TestIsAddrInUse_True(t *testing.T) {
 	t.Parallel()
 	err := &net.OpError{Err: &os.SyscallError{Err: syscall.EADDRINUSE}}
 	assert.True(t, IsAddrInUse(err))
+	assert.True(t, IsAddrInUse(errors.Join(err)))
 }
 
 // TestNewNamedAddress_Error covers newNamedAddress error path for unresolved host.

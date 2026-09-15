@@ -2,10 +2,15 @@ package maps
 
 import (
 	"cmp"
-	"sort"
+	stdmaps "maps"
+	"slices"
 )
 
-// Keys returns all keys from the map as a slice
+// Keys returns all keys from the map as a slice.
+//
+// Deprecated: use slices.Collect(maps.Keys(m)) from the standard library
+// (Go 1.23+). The standard-library expression returns nil for an empty map;
+// Keys returns a non-nil empty slice.
 func Keys[K comparable, V any](m map[K]V) []K {
 	keys := make([]K, 0, len(m))
 	for k := range m {
@@ -14,19 +19,22 @@ func Keys[K comparable, V any](m map[K]V) []K {
 	return keys
 }
 
-// OrderedKeys returns all keys from the map as a slice
+// OrderedKeys returns all keys from the map as a sorted slice.
+//
+// Deprecated: use slices.Sorted(maps.Keys(m)) from the standard library
+// (Go 1.23+). The standard-library expression returns nil for an empty map;
+// OrderedKeys returns a non-nil empty slice.
 func OrderedKeys[K cmp.Ordered, V any](m map[K]V) []K {
-	keys := make([]K, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
+	keys := Keys(m)
+	slices.Sort(keys)
 	return keys
 }
 
-// Values returns all values from the map as a slice
+// Values returns all values from the map as a slice.
+//
+// Deprecated: use slices.Collect(maps.Values(m)) from the standard library
+// (Go 1.23+). The standard-library expression returns nil for an empty map;
+// Values returns a non-nil empty slice.
 func Values[K comparable, V any](m map[K]V) []V {
 	values := make([]V, 0, len(m))
 	for _, v := range m {
@@ -103,17 +111,21 @@ func All[K comparable, V any](m map[K]V, predicate func(key K, value V) bool) bo
 	return true
 }
 
-// Merge combines multiple maps into one, with later maps taking precedence
+// Merge combines multiple maps into one, with later maps taking precedence.
+//
+// use maps.Clone and maps.Copy from the standard library
+// (Go 1.21+). Merge always returns a non-nil map, including with no inputs.
 func Merge[K comparable, V any](maps ...map[K]V) map[K]V {
 	if len(maps) == 0 {
 		return make(map[K]V)
 	}
 
-	result := make(map[K]V)
-	for _, m := range maps {
-		for k, v := range m {
-			result[k] = v
-		}
+	result := stdmaps.Clone(maps[0])
+	if result == nil {
+		result = make(map[K]V)
+	}
+	for _, m := range maps[1:] {
+		stdmaps.Copy(result, m)
 	}
 	return result
 }

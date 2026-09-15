@@ -2,49 +2,37 @@
 package slices
 
 import (
+	"cmp"
 	"crypto"
 	"encoding/base64"
-	"errors"
 	"regexp"
+	stdslices "slices"
 	"strings"
+
+	"github.com/cockroachdb/errors"
 )
 
-// ByteSlicesEqual returns true only if the contents of the 2 slices are the same
+// ByteSlicesEqual returns true only if the contents of the 2 slices are the same.
+//
+// Deprecated: use slices.Equal from the standard library.
 func ByteSlicesEqual(a, b []byte) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for idx, v := range a {
-		if v != b[idx] {
-			return false
-		}
-	}
-	return true
+	return stdslices.Equal(a, b)
 }
 
-// StringSlicesEqual returns true only if the contents of the 2 slices are the same
+// StringSlicesEqual returns true only if the contents of the 2 slices are the same.
+//
+// Deprecated: use slices.Equal from the standard library.
 func StringSlicesEqual(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for idx, v := range a {
-		if v != b[idx] {
-			return false
-		}
-	}
-	return true
+	return stdslices.Equal(a, b)
 }
 
-// ContainsString returns true if the items slice contains a value equal to item
+// ContainsString returns true if the items slice contains a value equal to item.
 // Note that this can end up traversing the entire slice, and so is only really
 // suitable for small slices, for larger data sets, consider using a map instead.
+//
+// Deprecated: use slices.Contains from the standard library.
 func ContainsString(items []string, item string) bool {
-	for _, x := range items {
-		if x == item {
-			return true
-		}
-	}
-	return false
+	return stdslices.Contains(items, item)
 }
 
 // StringContainsOneOf returns true if one of items slice is a substring of specified value.
@@ -80,26 +68,20 @@ func ContainsStringEqualFold(items []string, item string) bool {
 	return false
 }
 
-// CloneStrings will return an independnt copy of the src slice, it preserves
+// CloneStrings will return an independent copy of the src slice, it preserves
 // the distinction between a nil value and an empty slice.
+//
+// Deprecated: use slices.Clone from the standard library.
 func CloneStrings(src []string) []string {
-	if src != nil {
-		c := make([]string, len(src))
-		copy(c, src)
-		return c
-	}
-	return nil
+	return stdslices.Clone(src)
 }
 
 // NvlString returns the first string from the supplied list that has len() > 0
-// or "" if all the strings are empty
+// or "" if all the strings are empty.
+//
+// Deprecated: use cmp.Or from the standard library (Go 1.22+).
 func NvlString(items ...string) string {
-	for _, x := range items {
-		if len(x) > 0 {
-			return x
-		}
-	}
-	return ""
+	return cmp.Or(items...)
 }
 
 // Prefixed returns a new slice of strings with each input item prefixed by the supplied prefix
@@ -137,17 +119,11 @@ func MapStringSlice(items []string, mapFn func(in string) string) []string {
 	return res
 }
 
-// BoolSlicesEqual returns true only if the contents of the 2 slices are the same
+// BoolSlicesEqual returns true only if the contents of the 2 slices are the same.
+//
+// Deprecated: use slices.Equal from the standard library.
 func BoolSlicesEqual(a, b []bool) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for idx, v := range a {
-		if v != b[idx] {
-			return false
-		}
-	}
-	return true
+	return stdslices.Equal(a, b)
 }
 
 // StringUpto returns the beginning of the string up to `max`
@@ -158,43 +134,25 @@ func StringUpto(str string, maxLen int) string {
 	return str
 }
 
-// Int64SlicesEqual returns true only if the contents of the 2 slices are the same
+// Int64SlicesEqual returns true only if the contents of the 2 slices are the same.
+//
+// Deprecated: use slices.Equal from the standard library.
 func Int64SlicesEqual(a, b []int64) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for idx, v := range a {
-		if v != b[idx] {
-			return false
-		}
-	}
-	return true
+	return stdslices.Equal(a, b)
 }
 
-// Uint64SlicesEqual returns true only if the contents of the 2 slices are the same
+// Uint64SlicesEqual returns true only if the contents of the 2 slices are the same.
+//
+// Deprecated: use slices.Equal from the standard library.
 func Uint64SlicesEqual(a, b []uint64) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for idx, v := range a {
-		if v != b[idx] {
-			return false
-		}
-	}
-	return true
+	return stdslices.Equal(a, b)
 }
 
-// Float64SlicesEqual returns true only if the contents of the 2 slices are the same
+// Float64SlicesEqual returns true only if the contents of the 2 slices are the same.
+//
+// Deprecated: use slices.Equal from the standard library.
 func Float64SlicesEqual(a, b []float64) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for idx, v := range a {
-		if v != b[idx] {
-			return false
-		}
-	}
-	return true
+	return stdslices.Equal(a, b)
 }
 
 // UniqueStrings removes duplicates from the given list
@@ -241,13 +199,10 @@ func Truncate[T any](arr []T, maxLen uint) []T {
 }
 
 // Contains returns true if val is in arr, and false otherwise.
+//
+// Deprecated: use slices.Contains from the standard library.
 func Contains[T comparable](arr []T, val T) bool {
-	for _, v := range arr {
-		if v == val {
-			return true
-		}
-	}
-	return false
+	return stdslices.Contains(arr, val)
 }
 
 // StringArrayToMap converts a string array to a map.
@@ -278,7 +233,13 @@ func Replace[E comparable](slice []E, old, newVal E) {
 	}
 }
 
-// HashStrings returns the base64 SHA-1 of a series of string values
+// HashStrings returns the base64 SHA-1 of a series of string values.
+// Adjacent strings are concatenated with no delimiter, so
+// HashStrings("ab", "c") equals HashStrings("a", "bc").
+//
+// Deprecated: SHA-1 is not a safe digest. For a non-cryptographic fingerprint
+// use values.XXH3HashArgs128Hex. For integrity use crypto/sha256 with explicit
+// length prefixes. Do not change this function: stored hashes would break.
 func HashStrings(values ...string) string {
 	h := crypto.SHA1.New()
 	for _, v := range values {

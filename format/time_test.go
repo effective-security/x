@@ -32,7 +32,7 @@ func TestParseStringTime(t *testing.T) {
 	t7 := format.ParseStringTime("2024-02-12T17:07:02.123Z")
 	assert.Equal(t, "2024-02-12T17:07:02Z", t7.UTC().Format(time.RFC3339))
 	t8 := format.ParseStringTime("2024-02-12T17:07:02.123+07:00")
-	assert.Equal(t, "2024-02-12T17:07:02Z", t8.UTC().Format(time.RFC3339))
+	assert.Equal(t, "2024-02-12T10:07:02Z", t8.UTC().Format(time.RFC3339))
 }
 
 func TestParseTime(t *testing.T) {

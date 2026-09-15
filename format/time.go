@@ -28,22 +28,21 @@ func ParseStringTime(val string) time.Time {
 		return time.Time{}
 	}
 
-	var t time.Time
-	switch len(val) {
-	case len(DefaultTimeFormatZone):
-		t, _ = time.Parse(DefaultTimeFormatZone, val)
-	case len(DefaultTimeFormatUTC):
-		t, _ = time.Parse(DefaultTimeFormatUTC, val)
-	case len(time.RFC3339):
-		t, _ = time.Parse(time.RFC3339, val)
-	case len(time.DateTime):
-		t, _ = time.Parse(time.DateTime, val)
-	case len(time.DateOnly):
-		t, _ = time.Parse(time.DateOnly, val)
-	default:
-		t, _ = time.Parse(time.RFC3339Nano, val)
+	for _, layout := range parseTimeLayouts {
+		if t, err := time.Parse(layout, val); err == nil {
+			return t.Truncate(DefaultTimeTruncate)
+		}
 	}
-	return t.Truncate(DefaultTimeTruncate)
+	return time.Time{}
+}
+
+var parseTimeLayouts = []string{
+	time.RFC3339Nano,
+	DefaultTimeFormatZone,
+	DefaultTimeFormatUTC,
+	time.RFC3339,
+	time.DateTime,
+	time.DateOnly,
 }
 
 // ParseTime returns time from any type

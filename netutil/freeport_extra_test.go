@@ -12,5 +12,6 @@ func TestFindFreePort_Error(t *testing.T) {
 	t.Parallel()
 	p, err := netutil.FindFreePort("no-such-host", 1)
 	assert.Equal(t, 0, p)
-	assert.EqualError(t, err, "no free port found")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no free port found: unable to resolve TCP address")
 }

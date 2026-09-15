@@ -17,6 +17,8 @@ import (
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/x", "configloader")
 
+const unknownUserName = "unknown"
+
 // Factory is used to create Configuration instance
 type Factory struct {
 	nodeInfo    netutil.NodeInfo
@@ -110,7 +112,9 @@ func (f *Factory) LoadForHostName(configFile, hostnameOverride string, config an
 		// ignore error as Environment may not exist in the config
 		_ = reflections.SetField(config, "Environment", environment)
 	} else if value, err := reflections.GetField(config, "Environment"); err == nil {
-		environment = value.(string)
+		if s, ok := value.(string); ok {
+			environment = s
+		}
 	}
 
 	variables := f.getVariableValues(environment)
@@ -278,7 +282,8 @@ func (f *Factory) normalizedUserName() string {
 func userName() string {
 	u, err := user.Current()
 	if err != nil {
-		logger.Panicf("unable to determine current user: %v", err)
+		logger.KV(xlog.ERROR, "reason", "current_user", "err", err)
+		return unknownUserName
 	}
 	return u.Username
 }

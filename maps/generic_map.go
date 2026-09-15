@@ -2,6 +2,7 @@ package maps
 
 import "sync"
 
+// SyncMap is a typed wrapper around sync.Map.
 type SyncMap[K comparable, V any] struct {
 	m sync.Map
 }

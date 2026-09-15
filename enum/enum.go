@@ -123,14 +123,15 @@ func SliceDisplayNamesString[E DisplayNames](vals []E) string {
 // FlagNames returns list of enum value names from flag value
 func FlagNames[E Names](val E) []string {
 	names := val.NamesMap()
+	remaining := uint32(val)
 
 	var vals []string
-	for i := E(1); i > 0 && i <= val; i <<= 1 {
-		if val&i == i {
-			name := names[int32(i)]
-			if name != "" {
-				vals = append(vals, names[int32(i)])
-			}
+	for remaining != 0 {
+		bit := remaining & -remaining // lowest set bit
+		remaining &= remaining - 1    // clear lowest set bit
+
+		if names[int32(bit)] != "" {
+			vals = append(vals, names[int32(bit)])
 		}
 	}
 	return vals
@@ -139,11 +140,14 @@ func FlagNames[E Names](val E) []string {
 // FlagsInt returns list of enum values from flag
 func FlagsInt[E Names](val E) []int32 {
 	names := val.NamesMap()
-
+	remaining := uint32(val)
 	var vals []int32
-	for i := E(1); i > 0 && i <= val; i <<= 1 {
-		if val&i == i && names[int32(i)] != "" {
-			vals = append(vals, int32(i))
+	for remaining != 0 {
+		bit := remaining & -remaining // lowest set bit
+		remaining &= remaining - 1    // clear lowest set bit
+
+		if names[int32(bit)] != "" {
+			vals = append(vals, int32(bit))
 		}
 	}
 	return vals
@@ -152,11 +156,14 @@ func FlagsInt[E Names](val E) []int32 {
 // Flags returns list of enum values from flag
 func Flags[E Names](val E) []E {
 	names := val.NamesMap()
-
+	remaining := uint32(val)
 	var vals []E
-	for i := E(1); i > 0 && i <= val; i <<= 1 {
-		if val&i == i && names[int32(i)] != "" {
-			vals = append(vals, i)
+	for remaining != 0 {
+		bit := remaining & -remaining // lowest set bit
+		remaining &= remaining - 1    // clear lowest set bit
+
+		if names[int32(bit)] != "" {
+			vals = append(vals, E(bit))
 		}
 	}
 	return vals

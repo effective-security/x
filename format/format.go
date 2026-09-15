@@ -29,10 +29,17 @@ func Float[T ~float32 | ~float64](val T) string {
 	return fmt.Sprintf("%0.2f", val)
 }
 
-// StringMax returns the string value with a maximum length of max.
+// StringMax returns the string value with a maximum length of max runes.
 func StringMax(limit int, val string) string {
-	if len(val) > limit {
-		return val[:limit] + "..."
+	if limit < 0 {
+		limit = 0
+	}
+	n := 0
+	for i := range val {
+		if n == limit {
+			return val[:i] + "..."
+		}
+		n++
 	}
 	return val
 }
@@ -272,7 +279,8 @@ func TextOneLine(doc string) string {
 		size := len(part)
 		if size > 0 {
 			if lines > 0 {
-				if !prevPartDot && unicode.IsUpper(rune(part[0])) {
+				first, _ := utf8.DecodeRuneInString(part)
+				if !prevPartDot && unicode.IsUpper(first) {
 					buf.WriteString(".")
 				}
 				buf.WriteString(" ")

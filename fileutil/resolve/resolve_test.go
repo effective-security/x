@@ -7,15 +7,15 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"uuid"
 
 	"github.com/effective-security/x/fileutil/resolve"
-	"github.com/effective-security/x/guid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_ResolveDirectory(t *testing.T) {
-	tmpDir := path.Join(os.TempDir(), "resolve-test", guid.MustCreate())
+	tmpDir := path.Join(os.TempDir(), "resolve-test", uuid.NewV7().String())
 	testData := []struct {
 		dir     string
 		baseDir string
@@ -49,6 +49,7 @@ func Test_ResolveDirectory(t *testing.T) {
 			if v.err != "" {
 				require.Error(t, err)
 				assert.True(t, strings.Contains(err.Error(), v.err))
+				assert.EqualError(t, err, fmt.Sprintf("stat %s/%s: no such file or directory", v.baseDir, v.dir))
 			} else {
 				assert.NoError(t, err)
 				assert.NotEmpty(t, d)
@@ -78,7 +79,7 @@ func Test_File(t *testing.T) {
 	assert.Equal(t, fabs, f3)
 
 	_, err = resolve.File(fabs+".junk", "/does/not/matter")
-	assert.Error(t, err)
+	assert.EqualError(t, err, fmt.Sprintf("stat %s.junk: no such file or directory", fabs))
 }
 
 func Test_ExpandPath(t *testing.T) {

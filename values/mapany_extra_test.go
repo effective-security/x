@@ -126,3 +126,28 @@ func TestMapAnyFromProtoValue(t *testing.T) {
 		})
 	}
 }
+
+func TestMapAny_AddKeepsFalseAndZero(t *testing.T) {
+	t.Parallel()
+	m := MapAny{}.Add("ok", false).Add("n", 0).Add("s", "").Add("skip", nil)
+	assert.Equal(t, false, m["ok"])
+	assert.Equal(t, 0, m["n"])
+	_, hasEmpty := m["s"]
+	assert.False(t, hasEmpty)
+	_, hasNil := m["skip"]
+	assert.False(t, hasNil)
+}
+
+func TestMapAny_SliceNoPanic(t *testing.T) {
+	t.Parallel()
+	m := MapAny{
+		"any":  []any{1, 2},
+		"strs": []string{"a", "b"},
+		"bad":  "nope",
+	}
+	assert.Equal(t, []any{1, 2}, m.Slice("any"))
+	assert.Equal(t, []any{"a", "b"}, m.Slice("strs"))
+	assert.Nil(t, m.Slice("bad"))
+	assert.Nil(t, m.Slice("missing"))
+	assert.Nil(t, MapAny(nil).Slice("x"))
+}

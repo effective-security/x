@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"reflect"
+	stdslices "slices"
 	"strings"
 	"sync"
 	"unicode"
+	"unicode/utf8"
 
-	"github.com/effective-security/x/maps"
 	"github.com/effective-security/x/slices"
 	"github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v3"
@@ -82,9 +84,6 @@ func Object(w io.Writer, format string, value any) {
 
 // Print value
 func Print(w io.Writer, value any) {
-	registryMutex.RLock()
-	defer registryMutex.RUnlock()
-
 	if printFunc, found := FindRegistered(value); found {
 		printFunc(w, value)
 		return
@@ -117,7 +116,7 @@ func Map(w io.Writer, header []string, vals map[string]string) {
 	table := tablewriter.NewTable(w)
 	table.Header(header)
 
-	for _, k := range maps.OrderedKeys(vals) {
+	for _, k := range stdslices.Sorted(maps.Keys(vals)) {
 		_ = table.Append([]string{k, slices.StringUpto(vals[k], 80)})
 	}
 
@@ -153,7 +152,8 @@ func TextOneLine(w io.Writer, doc string) {
 		size := len(part)
 		if size > 0 {
 			if lines > 0 {
-				if !prevPartDot && unicode.IsUpper(rune(part[0])) {
+				first, _ := utf8.DecodeRuneInString(part)
+				if !prevPartDot && unicode.IsUpper(first) {
 					fmt.Fprint(w, ".")
 				}
 				fmt.Fprint(w, " ")

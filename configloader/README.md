@@ -5,7 +5,7 @@ Installation
 ------------
 
 ```
-go get github.com/effective-security/x/pkg/configloader
+go get github.com/effective-security/x/configloader
 ```
 
 Usage

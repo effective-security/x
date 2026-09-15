@@ -1,6 +1,7 @@
 package values
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"math"
@@ -557,6 +558,8 @@ func TestValues_Time(t *testing.T) {
 		"time":       time.Unix(123, 0),
 		"*time":      tPtr(time.Unix(123, 0)),
 		"str":        "2006-01-02T15:04:05.000-0700",
+		"rfc3339":    "2006-01-02T15:04:05+00:00",
+		"date":       "2006-01-02",
 		"invalid":    "2006000000000000000000000000",
 		"int":        int(189898989898),
 		"float":      float64(189898989898.0),
@@ -575,6 +578,10 @@ func TestValues_Time(t *testing.T) {
 	c(o, "time", tPtr(time.Unix(123, 0)))
 	c(o, "*time", tPtr(time.Unix(123, 0)))
 	c(o, "str", tPtr(time.Date(2006, time.January, 2, 15, 4, 5, 0, loc)))
+	rfc := o.Time("rfc3339")
+	require.NotNil(t, rfc)
+	assert.True(t, rfc.Equal(time.Date(2006, time.January, 2, 15, 4, 5, 0, time.UTC)))
+	c(o, "date", tPtr(time.Date(2006, time.January, 2, 0, 0, 0, 0, time.UTC)))
 	c(o, "invalid", nil)
 	c(o, "ze", nil)
 	c(o, "int16", nil)
@@ -725,6 +732,11 @@ func Test_StringsCoalesce(t *testing.T) {
 	assert.Equal(t, "1", StringsCoalesce("1", "2", "3"))
 	assert.Equal(t, "2", StringsCoalesce("", "2", "3"))
 	assert.Equal(t, "3", StringsCoalesce("", "", "3"))
+
+	// compare with cmp.Or
+	assert.Equal(t, "1", cmp.Or("1", "2", "3"))
+	assert.Equal(t, "2", cmp.Or("", "2", "3"))
+	assert.Equal(t, "3", cmp.Or("", "", "3"))
 }
 
 func Test_Coalesce(t *testing.T) {
@@ -738,16 +750,24 @@ func Test_Coalesce(t *testing.T) {
 	assert.Equal(t, []string{"2", "3"}, Coalesce([]string{}, []string{"2", "3"}))
 	var empty []string
 	assert.Equal(t, []string{"3"}, Coalesce(empty, empty, []string{"3"}))
+	assert.Equal(t, "", Coalesce[string]())
 }
 
 func TestNvlNumber(t *testing.T) {
 	assert.Equal(t, 1, NumbersCoalesce(0, 1))
 	assert.Equal(t, uint64(1), NumbersCoalesce(0, uint64(1)))
+
+	// compare with cmp.Or
+	assert.Equal(t, 1, cmp.Or(0, 1))
+	assert.Equal(t, uint64(1), cmp.Or(0, uint64(1)))
 }
 
 func TestSelect(t *testing.T) {
 	assert.Equal(t, 1, Select(false, 0, 1))
 	assert.Equal(t, uint64(0), Select(true, 0, uint64(1)))
+
+	assert.Equal(t, 1, SelectFunc(false, func() int { return 0 }, func() int { return 1 }))
+	assert.Equal(t, uint64(0), SelectFunc(true, func() uint64 { return 0 }, func() uint64 { return 1 }))
 }
 
 func Test_MapAny_DB(t *testing.T) {
