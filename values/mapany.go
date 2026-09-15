@@ -5,11 +5,12 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"reflect"
+	"slices"
 	"time"
 
 	"github.com/cockroachdb/errors"
-	"github.com/effective-security/x/maps"
 	"github.com/effective-security/xlog"
 	"gopkg.in/yaml.v3"
 )
@@ -116,7 +117,9 @@ func (c MapAny) YAML() string {
 	return string(raw)
 }
 
-// Add adds a Non-Empty key-value pair to the map.
+// Add adds a key-value pair to the map.
+// Empty keys, nil, "" and empty collections are skipped.
+// false and numeric zeros are stored.
 func (c MapAny) Add(key string, value any) MapAny {
 	if key == "" || value == nil {
 		return c
@@ -124,10 +127,23 @@ func (c MapAny) Add(key string, value any) MapAny {
 	if c == nil {
 		c = make(MapAny)
 	}
-	if !IsEmpty(value) {
-		c[key] = value
+	if skipEmptyAdd(value) {
+		return c
 	}
+	c[key] = value
 	return c
+}
+
+func skipEmptyAdd(value any) bool {
+	v := reflect.ValueOf(value)
+	switch v.Kind() {
+	case reflect.String, reflect.Array, reflect.Slice, reflect.Map:
+		return v.Len() == 0
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Pointer, reflect.UnsafePointer:
+		return v.IsNil()
+	default:
+		return false
+	}
 }
 
 // Has will return true if the map contains the key
@@ -224,7 +240,25 @@ func (c MapAny) Slice(k string) []any {
 	if c == nil {
 		return nil
 	}
-	return c[k].([]any)
+	return anySlice(c[k])
+}
+
+func anySlice(v any) []any {
+	if v == nil {
+		return nil
+	}
+	if s, ok := v.([]any); ok {
+		return s
+	}
+	rv := reflect.ValueOf(v)
+	if rv.Kind() != reflect.Slice {
+		return nil
+	}
+	out := make([]any, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		out[i] = rv.Index(i).Interface()
+	}
+	return out
 }
 
 func (c MapAny) IsMap(k string) bool {
@@ -426,11 +460,14 @@ func (c MapAny) CanonicalJSON() ([]byte, error) {
 }
 
 func (c MapAny) Keys() []string {
-	return maps.Keys(c)
+	keys := make([]string, 0, len(c))
+	return slices.AppendSeq(keys, maps.Keys(c))
 }
 
 func (c MapAny) OrderedKeys() []string {
-	return maps.OrderedKeys(c)
+	keys := c.Keys()
+	slices.Sort(keys)
+	return keys
 }
 
 // Range range over map keys

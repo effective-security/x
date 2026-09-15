@@ -8,8 +8,9 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-// Directory returns absolute dir name relative to baseDir,
-// or NewNotFound error.
+// Directory returns the absolute directory name relative to baseDir.
+// If the directory does not exist and create is false, a "not found" error
+// is returned.
 func Directory(dir string, baseDir string, create bool) (resolved string, err error) {
 	if dir == "" {
 		return dir, nil
@@ -22,17 +23,17 @@ func Directory(dir string, baseDir string, create bool) (resolved string, err er
 	if _, err := os.Stat(resolved); os.IsNotExist(err) {
 		if create {
 			if err = os.MkdirAll(resolved, 0744); err != nil {
-				return "", errors.WithMessagef(err, "crerate dir: %q", resolved)
+				return "", errors.Wrapf(err, "failed to create dir: %q", resolved)
 			}
 		} else {
-			return resolved, errors.WithMessagef(err, "not found: %v", resolved)
+			return resolved, errors.WithStack(err)
 		}
 	}
 	return resolved, nil
 }
 
-// File returns absolute file name relative to baseDir,
-// or NewNotFound error.
+// File returns the absolute file name relative to baseDir.
+// If the file does not exist, a "not found" error is returned.
 func File(file string, baseDir string) (resolved string, err error) {
 	if file == "" {
 		return file, nil
@@ -41,9 +42,11 @@ func File(file string, baseDir string) (resolved string, err error) {
 		resolved = file
 	} else if baseDir != "" {
 		resolved = filepath.Join(baseDir, file)
+	} else {
+		resolved = file
 	}
 	if _, err := os.Stat(resolved); os.IsNotExist(err) {
-		return resolved, errors.WithMessagef(err, "not found: %v", resolved)
+		return resolved, errors.WithStack(err)
 	}
 	return resolved, nil
 }
@@ -57,10 +60,10 @@ func ExpandPath(file string) string {
 		return file
 	}
 
-	// firt resolve any env vars in the path
+	// First resolve any environment variables in the path.
 	file = os.ExpandEnv(file)
 
-	// then resolve ~
+	// Then resolve ~.
 	file, _ = homedir.Expand(file)
 	return file
 }

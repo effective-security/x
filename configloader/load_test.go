@@ -101,6 +101,14 @@ func Test_Unmarshal(t *testing.T) {
 	fn := path.Join(tmp, "test_config.yaml")
 	err = configloader.Marshal(fn, &v)
 	require.NoError(t, err)
+	info, err := os.Stat(fn)
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())
+	require.NoError(t, os.Chmod(fn, 0o644))
+	require.NoError(t, configloader.Marshal(fn, &v))
+	info, err = os.Stat(fn)
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())
 
 	var v2 config
 	err = configloader.Unmarshal(fn, &v2)

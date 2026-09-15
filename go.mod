@@ -6,10 +6,10 @@ require (
 	github.com/alecthomas/kong v1.16.1
 	github.com/cockroachdb/errors v1.14.0
 	github.com/deckarep/golang-set v1.8.0
-	github.com/effective-security/xlog v0.12.61
+	github.com/effective-security/xlog v0.12.67
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/oleiade/reflections v1.1.0
-	github.com/olekukonko/tablewriter v1.1.4
+	github.com/olekukonko/tablewriter v1.1.5
 	github.com/stretchr/testify v1.12.1
 	github.com/zeebo/xxh3 v1.1.0
 	go.uber.org/config v1.4.1

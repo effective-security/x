@@ -15,6 +15,14 @@ import (
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/x", "values")
 
+var timeLayouts = []string{
+	time.RFC3339Nano,
+	time.RFC3339,
+	time.DateTime,
+	time.DateOnly,
+	"2006-01-02T15:04:05.000-0700",
+}
+
 type HasDisplayName interface {
 	DisplayName() string
 }
@@ -259,12 +267,10 @@ func Time(v any) *time.Time {
 		t := time.Unix(int64(tv), 0)
 		return &t
 	case string:
-		if len(tv) > 20 {
-			t, err := time.Parse("2006-01-02T15:04:05.000-0700", tv)
-			if err != nil {
-				return nil
+		for _, layout := range timeLayouts {
+			if t, err := time.Parse(layout, tv); err == nil {
+				return &t
 			}
-			return &t
 		}
 		unix, err := strconv.ParseInt(tv, 10, 64)
 		if err != nil {

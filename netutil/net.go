@@ -3,8 +3,9 @@ package netutil
 import (
 	"fmt"
 	"net"
-	"os"
 	"syscall"
+
+	"github.com/cockroachdb/errors"
 )
 
 // namedAddress represents a TCP Network address based on host name rather
@@ -45,10 +46,5 @@ func (a *namedAddress) Resolve() (*net.TCPAddr, error) {
 
 // IsAddrInUse checks whether the given error indicates "address in use"
 func IsAddrInUse(err error) bool {
-	if err, ok := err.(*net.OpError); ok {
-		if err, ok := err.Err.(*os.SyscallError); ok {
-			return err.Err == syscall.EADDRINUSE
-		}
-	}
-	return false
+	return errors.Is(err, syscall.EADDRINUSE)
 }

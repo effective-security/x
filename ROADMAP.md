@@ -93,15 +93,15 @@ func From[T any](v T) (MapAny, error)
 
 ### `maps.SyncMap`
 
-If the type stays (see §3), add the methods stdlib already has, as
-generic methods only where the type param is *not* `K`/`V`:
+Keep the typed wrapper: Go 1.27's `sync.Map` still accepts `any` keys and
+values. Add typed versions of the methods the standard type already has:
 
 ```go
-func (m *SyncMap[K, V]) Transform[R any](f func(K, V) R) []R
+func (m *SyncMap[K, V]) Swap(key K, value V) (V, bool)
+func (m *SyncMap[K, V]) CompareAndSwap(key K, old, new V) bool
+func (m *SyncMap[K, V]) CompareAndDelete(key K, old V) bool
+func (m *SyncMap[K, V]) Clear()
 ```
-
-A better outcome is to delete `SyncMap` and tell callers to use
-`sync.Map[K, V]`.
 
 ### `print`
 
@@ -143,7 +143,6 @@ do not break callers in one cut.
 | `maps.Keys` / `Values` | `maps.Keys` / `maps.Values` iterators (1.23) | Return `iter.Seq` or collect with `slices.Collect` |
 | `maps.Merge` | `maps.Copy` / `maps.Clone` (1.21) | `Clone` then `Copy` |
 | `maps.OrderedKeys` | `slices.Sorted(maps.Keys(m))` (1.23) | One-liner |
-| `maps.SyncMap` | `sync.Map[K,V]` (1.24) | Deprecate the wrapper |
 | `slices.Contains` | `slices.Contains` (1.21) | Alias |
 | `slices.*SlicesEqual` | `slices.Equal` (1.21) | Alias |
 | `slices.CloneStrings` | `slices.Clone` (1.21) | Alias (nil-preserving) |
@@ -166,16 +165,11 @@ do not break callers in one cut.
 
 ### `uuid`
 
-`guid` is a 16-byte hex formatter, not a UUID. Plan:
-
-1. Implement `MustCreate` with `uuid.New()` (v4) so the string is a
-   valid RFC 9562 UUID (version + variant bits). **This is a format
-   change** for the 13th hex digit; call it out in the changelog.
-2. Add `Create() (string, error)` that does not panic.
-3. Add `V7()` for time-sortable IDs when callers would otherwise reach
-   for `flake` just to sort.
-4. Keep uppercase vs lowercase as an explicit option; stdlib `UUID.String`
-   is lowercase.
+`guid.MustCreate` already delegates to `uuid.NewV7().String()`. Keep the
+deprecated wrapper for source compatibility and direct new callers to
+`uuid.NewV7` for time-sortable UUIDs or `uuid.NewV4` for random UUIDs.
+The standard functions return values directly, so a parallel `Create`
+API would add no capability.
 
 Do not replace `flake` with UUID v7. Flake is a 64-bit sortable ID with
 an explicit machine field; v7 is 128-bit and leaks time. They solve
@@ -245,7 +239,7 @@ Not a fit. This library is not compute-heavy. Revisit only if
 
 ### `maps`
 
-- Deprecate `SyncMap`.
+- Keep `SyncMap` as a typed wrapper and add the missing stdlib operations.
 - Iterator-returning `Keys` / `Values` / `Range` (`iter.Seq2[K,V]`).
 - `Collect` helpers that sit on `iter`.
 
@@ -264,8 +258,15 @@ Not a fit. This library is not compute-heavy. Revisit only if
 
 ### `slices`
 
-- Mark typed equals/contains as deprecated aliases.
-- Fix `HashStrings` (FINDINGS) or move callers to `values.XXH3HashArgs*`.
+- Typed equals/contains/`HashStrings` are **Deprecated** (see FINDINGS
+  F-SLC-01, F-SLC-02). Keep implementations unchanged so existing hashes
+  and call sites keep working.
+- Replacement for `HashStrings` (new name, not a silent digest change):
+  1. `values.XXH3HashArgs128Hex(parts...)` for fingerprints / cache keys.
+  2. A future `HashStringsSHA256` that length-prefixes each string
+     (`uint64` big-endian length + bytes) then SHA-256, if callers need
+     a cryptographic digest.
+  Do not change `HashStrings` in place.
 
 ### `ticker`
 
@@ -293,14 +294,22 @@ Not a fit. This library is not compute-heavy. Revisit only if
 
 ## 6. Suggested order
 
-1. Security fixes in FINDINGS (`configloader` file mode / `file://` /
-   secrets, `urlutil` forwarded headers, `slices.HashStrings`).
-2. Concurrency fixes (`print.Print` lock, `reloader.Close`).
+1. ~~Security / bug fixes that do not break callers~~ (this change:
+   F-CFG-01/03/05/06/07, F-ENUM-01, F-REL-01, F-FMT-*, F-NET-01/02,
+   F-PRT-01, F-VAL-01/02/03/05, F-FLK-01).
+2. **Needs Approval** items in FINDINGS (`file://` bound, `CONFIG_DIR`
+   Setenv, `urlutil` forwarded headers, `Parse` errors, machine ID `0`).
 3. json v2 on `values` + `configloader` + `print` (tests first).
-4. `guid` → stdlib `uuid` (changelog).
+4. Remove Deprecated wrappers after a release cycle (`slices`, selected
+   `maps` collection helpers, `guid`, `StringsCoalesce`).
 5. Generic methods on `MapAny` and `print.Register`.
-6. Deprecate wrappers that duplicate `slices`, `maps`, and `sync.Map`.
-7. Features in §5 as follow-ups.
+6. Features in §5 as follow-ups.
+
+### Deprecation policy
+
+Do not change the digest or return value of a Deprecated function.
+Point godoc at the stdlib or `values.XXH3*` counterpart. Delete in a
+later major / agreed cleanup, not in the same release as the comment.
 
 Keep `Documentation/codemap.md` updated in the same change as each item
 (invariants, entry points, panic vs error).

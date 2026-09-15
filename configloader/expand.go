@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/cockroachdb/errors"
-	"github.com/effective-security/xlog"
 )
 
 // Expander is used to expand variables in the input object
@@ -18,9 +17,12 @@ type Expander struct {
 // ExpandAll replace variables in the input object, using default Expander.
 // The input object must be a pointer to a struct.
 // If secrets are used, SecretProviderInstance must be set.
-// The values started with env:// , file:// or secret:// must be resolved.
-// The values inside ${} will be tried to be resolved,
-// if not found will be substiduted with empy values as per os.Getenv function.
+// Values that start with env://, file:// or secret:// are resolved.
+// Names inside ${} are looked up in Variables, then os.Getenv; a missing
+// name becomes an empty string, matching os.Expand. After that pass, any
+// remaining "${" is an error (typically a value that expanded to another
+// interpolation). A failed or missing SecretProvider for ${secret://…}
+// is always an error.
 func ExpandAll(obj any) error {
 	e := Expander{SecretProvider: SecretProviderInstance}
 	return e.ExpandAll(obj)
@@ -33,13 +35,23 @@ func (f *Expander) ExpandAll(obj any) error {
 
 // Expand replace variables in the input string
 func (f *Expander) Expand(s string) (string, error) {
+	var expandErr error
 	if strings.Contains(s, "${") {
 		s = os.Expand(s, func(env string) string {
-			if strings.HasPrefix(env, SecretSource) && f.SecretProvider != nil {
+			if strings.HasPrefix(env, SecretSource) {
+				if f.SecretProvider == nil {
+					if expandErr == nil {
+						expandErr = errors.Errorf("secret loader not provided: unable to expand: ${%s}", env)
+					}
+					return ""
+				}
 				name := strings.TrimPrefix(env, SecretSource)
 				sec, err := f.SecretProvider.GetSecret(name)
 				if err != nil {
-					logger.KV(xlog.ERROR, "secret", name, "err", err.Error())
+					if expandErr == nil {
+						expandErr = errors.WithMessagef(err, "unable to load secret: %s", name)
+					}
+					return ""
 				}
 				return sec
 			}
@@ -49,13 +61,15 @@ func (f *Expander) Expand(s string) (string, error) {
 			}
 			return os.Getenv(env)
 		})
+		if expandErr != nil {
+			return s, expandErr
+		}
 	}
 
 	if strings.Contains(s, "${") {
 		return s, errors.Errorf("unable to resolve variables: %s", s)
 	}
 
-	// try prefix
 	s, err := ResolveValueWithSecrets(s, f.SecretProvider)
 	if err != nil {
 		return s, err
@@ -98,24 +112,55 @@ func (f *Expander) doSubstituteEnvVars(v reflect.Value) error {
 			return err
 		}
 	case reflect.Map:
-		if v.Type().String() == "map[string]string" {
-			m := v.Interface().(map[string]string)
-			for k, v := range m {
-				val, err := f.Expand(v)
-				if err != nil {
-					return err
-				}
-				m[k] = val
+		if v.IsNil() {
+			return nil
+		}
+		for _, key := range v.MapKeys() {
+			val := v.MapIndex(key)
+			if !val.IsValid() {
+				continue
 			}
-		} else {
-			iter := v.MapRange()
-			for iter.Next() {
-				if err := f.doSubstituteEnvVars(iter.Value()); err != nil {
-					return err
-				}
+			if err := f.expandMapEntry(v, key, val); err != nil {
+				return err
 			}
 		}
 	default:
 	}
 	return nil
+}
+
+// expandMapEntry expands a map value and writes it back. MapRange / MapIndex
+// values are not addressable, so strings and structs must be copied.
+func (f *Expander) expandMapEntry(m, key, val reflect.Value) error {
+	switch val.Kind() {
+	case reflect.Interface:
+		if val.IsNil() {
+			return nil
+		}
+		return f.expandMapEntry(m, key, val.Elem())
+	case reflect.String:
+		expanded, err := f.Expand(val.String())
+		if err != nil {
+			return err
+		}
+		newVal := reflect.ValueOf(expanded)
+		if newVal.Type() != val.Type() && newVal.CanConvert(val.Type()) {
+			newVal = newVal.Convert(val.Type())
+		}
+		m.SetMapIndex(key, newVal)
+		return nil
+	case reflect.Pointer:
+		return f.doSubstituteEnvVars(val)
+	default:
+		if val.CanAddr() {
+			return f.doSubstituteEnvVars(val)
+		}
+		cpy := reflect.New(val.Type()).Elem()
+		cpy.Set(val)
+		if err := f.doSubstituteEnvVars(cpy); err != nil {
+			return err
+		}
+		m.SetMapIndex(key, cpy)
+		return nil
+	}
 }

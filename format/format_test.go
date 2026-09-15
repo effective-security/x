@@ -39,6 +39,7 @@ func TestStringMax(t *testing.T) {
 	assert.Equal(t, "hello", format.StringMax(10, "hello"))
 	assert.Equal(t, "hello", format.StringMax(5, "hello"))
 	assert.Equal(t, "hello...", format.StringMax(5, "hello world"))
+	assert.Equal(t, "你好...", format.StringMax(2, "你好世界"))
 }
 
 func TestStrinsgs(t *testing.T) {
@@ -127,6 +128,7 @@ Line 2.
 Line 3
 `
 	assert.Equal(t, `line 1 with continuation. Line 2. Line 3.`, format.TextOneLine(doc))
+	assert.Equal(t, "über. Alles.", format.TextOneLine("über\nAlles"))
 
 	exp := `  line 1
   with continuation

@@ -1,6 +1,7 @@
 package enum_test
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -117,6 +118,29 @@ func Test_SliceDisplayNames(t *testing.T) {
 	assert.Equal(t, "Low", enum.SliceNamesString([]Severity_Enum{Severity_Low}))
 	assert.Equal(t, "", enum.SliceDisplayNamesString([]Severity_Enum{}))
 	assert.Equal(t, "", enum.SliceNamesString([]Severity_Enum{}))
+}
+
+func Test_FlagBit31(t *testing.T) {
+	const high WideFlag = math.MinInt32 // 1<<31 as int32
+	names := enum.FlagNames(high)
+	assert.Equal(t, []string{"HighBit"}, names)
+	assert.Equal(t, []WideFlag{high}, enum.Flags(high))
+	assert.Equal(t, []int32{int32(high)}, enum.FlagsInt(high))
+}
+
+type WideFlag int32
+
+const (
+	WideLow  WideFlag = 1
+	WideHigh WideFlag = math.MinInt32
+)
+
+func (WideFlag) ValuesMap() map[string]int32 {
+	return map[string]int32{"Low": 1, "HighBit": math.MinInt32}
+}
+
+func (WideFlag) NamesMap() map[int32]string {
+	return map[int32]string{1: "Low", math.MinInt32: "HighBit"}
 }
 
 func Test_BitMask(t *testing.T) {

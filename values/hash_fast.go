@@ -33,7 +33,7 @@ func XXH3Hash128Hex(data []byte) string {
 //
 // Supported types: string, []string, numeric scalars and slices (uint64, int64, uint32, int32, int), bool and []bool,
 // []byte, enum.ProtoEnum and []enum.ProtoEnum. Other values are serialized with String(v) (see package values).
-// String and []string elements are followed by a zero byte delimiter so adjacent fields do not merge ambiguously.
+// String and []string elements are length-prefixed and followed by a 0xff delimiter so adjacent fields do not merge ambiguously.
 // Slices of fixed-width types are written without per-element delimiters; argument order and Go types distinguish fields.
 func XXH3HashArgs128Hex(data ...any) string {
 	return hex.EncodeToString(XXH3HashArgs128(data...))
@@ -43,7 +43,7 @@ func XXH3HashArgs128Hex(data ...any) string {
 //
 // Supported types: string, []string, numeric scalars and slices (uint64, int64, uint32, int32, int), bool and []bool,
 // []byte, enum.ProtoEnum and []enum.ProtoEnum. Other values are serialized with String(v) (see package values).
-// String and []string elements are followed by a zero byte delimiter so adjacent fields do not merge ambiguously.
+// String and []string elements are length-prefixed and followed by a 0xff delimiter so adjacent fields do not merge ambiguously.
 // Slices of fixed-width types are written without per-element delimiters; argument order and Go types distinguish fields.
 func XXH3HashArgs128(data ...any) []byte {
 	hash := xxh3.New128()
@@ -55,7 +55,7 @@ func XXH3HashArgs128(data ...any) []byte {
 //
 // Supported types: string, []string, numeric scalars and slices (uint64, int64, uint32, int32, int), bool and []bool,
 // []byte, enum.ProtoEnum and []enum.ProtoEnum. Other values are serialized with String(v) (see package values).
-// String and []string elements are followed by a zero byte delimiter so adjacent fields do not merge ambiguously.
+// String and []string elements are length-prefixed and followed by a 0xff delimiter so adjacent fields do not merge ambiguously.
 // Slices of fixed-width types are written without per-element delimiters; argument order and Go types distinguish fields.
 func XXH3HashArgs64(data ...any) uint64 {
 	hash := xxh3.New()

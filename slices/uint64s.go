@@ -1,6 +1,8 @@
 package slices
 
-// Uint64s is a slice of uint64, that knows how to be sorted, using sort.Sort
+// Uint64s is a slice of uint64, that knows how to be sorted, using sort.Sort.
+//
+// Deprecated: use slices.Sort on []uint64 from the standard library.
 type Uint64s []uint64
 
 // Len returns the length of the slice, as required by sort.Interface

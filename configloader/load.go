@@ -2,6 +2,7 @@ package configloader
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 	"strings"
 
@@ -16,6 +17,9 @@ const (
 	EnvSource = "env://"
 	// SecretSource specifies to load config from a secret manager
 	SecretSource = "secret://"
+
+	// defaultConfigFileMode is owner read/write only; configs often hold secrets.
+	defaultConfigFileMode = 0o600
 )
 
 // SecretProvider is an interface to provide secrets
@@ -110,5 +114,33 @@ func Marshal(fn string, value any) error {
 		return errors.WithMessage(err, "failed to encode")
 	}
 
-	return os.WriteFile(fn, data, os.ModePerm)
+	return writeConfigFile(fn, data)
+}
+
+func writeConfigFile(name string, data []byte) (retErr error) {
+	file, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE, defaultConfigFileMode)
+	if err != nil {
+		return errors.Wrapf(err, "unable to open config file %s", name)
+	}
+	defer func() {
+		if err := file.Close(); err != nil && retErr == nil {
+			retErr = errors.Wrapf(err, "unable to close config file %s", name)
+		}
+	}()
+
+	if err := file.Chmod(defaultConfigFileMode); err != nil {
+		return errors.Wrapf(err, "unable to set config file permissions for %s", name)
+	}
+	if err := file.Truncate(0); err != nil {
+		return errors.Wrapf(err, "unable to truncate config file %s", name)
+	}
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return errors.Wrapf(err, "unable to seek config file %s", name)
+	}
+	if n, err := file.Write(data); err != nil {
+		return errors.Wrapf(err, "unable to write config file %s", name)
+	} else if n != len(data) {
+		return errors.Wrapf(io.ErrShortWrite, "unable to write complete config file %s", name)
+	}
+	return nil
 }

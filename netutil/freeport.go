@@ -18,9 +18,11 @@ func FindFreePort(host string, maxAttempts int) (int, error) {
 		maxAttempts = 1
 	}
 
+	var lastErr error
 	for i := 0; i < maxAttempts; i++ {
 		addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(host, "0"))
 		if err != nil {
+			lastErr = errors.Wrapf(err, "unable to resolve TCP address for host %s", host)
 			logger.KV(xlog.ERROR,
 				"reason", "unable to resolve tcp addr",
 				"err", err.Error())
@@ -28,7 +30,7 @@ func FindFreePort(host string, maxAttempts int) (int, error) {
 		}
 		l, err := net.ListenTCP("tcp", addr)
 		if err != nil {
-			l.Close()
+			lastErr = errors.Wrapf(err, "unable to listen on %s", addr)
 			logger.KV(xlog.ERROR,
 				"reason", "unable to listen",
 				"addr", addr,
@@ -37,9 +39,11 @@ func FindFreePort(host string, maxAttempts int) (int, error) {
 		}
 
 		port := l.Addr().(*net.TCPAddr).Port
-		l.Close()
+		if err := l.Close(); err != nil {
+			return 0, errors.Wrapf(err, "unable to release TCP port %d", port)
+		}
 		return port, nil
 	}
 
-	return 0, errors.Errorf("no free port found")
+	return 0, errors.WithMessage(lastErr, "no free port found")
 }
