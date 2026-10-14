@@ -23,7 +23,7 @@ clean:
 
 tools:
 	go install github.com/effective-security/cov-report/cmd/cov-report@latest
-	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 
 build:
