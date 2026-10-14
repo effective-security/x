@@ -19,8 +19,8 @@ github.com/cockroachdb/redact v1.1.8/go.mod h1:GceHHpJ0rMDpYARL5In88Alq/xMBUtVlz
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/deckarep/golang-set v1.8.0 h1:sk9/l/KqpunDwP7pSjUg0keiOOLEnOBHzykLrsPppp4=
 github.com/deckarep/golang-set v1.8.0/go.mod h1:5nI87KwE7wgsBU1F4GKAw2Qod7p5kyS383rP6+o6qqo=
-github.com/effective-security/xlog v0.12.67 h1:Bt5hQ18ABidHLwJyeKm1Gh6lTcZhiJYQcwnIbNJVsoM=
-github.com/effective-security/xlog v0.12.67/go.mod h1:43iugADMjWaT4jaqxGhuyawrS6kLclhj2/EjY59qMNM=
+github.com/effective-security/xlog v1.0.69 h1:IkBXlwx+EIvkmbEx8EcWodyQIbXLcODpceWupQvVwbQ=
+github.com/effective-security/xlog v1.0.69/go.mod h1:mTijSHQgJkFLi13Ilc9CziGULKSEfeIE5pI8NnffhJQ=
 github.com/fatih/color v1.19.0 h1:Zp3PiM21/9Ld6FzSKyL5c/BULoe/ONr9KlbYVOfG8+w=
 github.com/fatih/color v1.19.0/go.mod h1:zNk67I0ZUT1bEGsSGyCZYZNrHuTkJJB+r6Q9VuMi0LE=
 github.com/getsentry/sentry-go v0.50.0 h1:gkO59rn/i0RCAXUUTflC5QVbTQGPXbaFabs2olVzc9g=
